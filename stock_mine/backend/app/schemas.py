@@ -9,7 +9,7 @@ from app.services.strategy import MAX_PULLBACK_DAYS, validate_pullback_days
 MAX_BREAKOUT_AGE = 9
 MIN_BACKTEST_LOOKBACK = 120
 MAX_BACKTEST_LOOKBACK = 1500
-StrategyMode = Literal["combined", "precision_pullback", "flag_breakout"]
+StrategyMode = Literal["combined", "precision_pullback", "flag_breakout", "triangle_breakout"]
 FlagDirection = Literal["all", "descending", "horizontal", "ascending"]
 PrecisionEngine = Literal["legacy", "pivot_fixed", "platform_events"]
 ProviderName = Literal["auto", "adata", "akshare", "sample", "demo", "fake"]

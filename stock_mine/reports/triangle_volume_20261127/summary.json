@@ -1,0 +1,178 @@
+{
+  "generated_at": "2026-11-27T15:00:02",
+  "lookback": 10,
+  "multiple": 1.5,
+  "retained": false,
+  "meets_validity_standard": false,
+  "rows": [
+    {
+      "signals": 766,
+      "stocks": 420,
+      "t5": {
+        "n": 764,
+        "mean_net": -0.546,
+        "median_net": -0.8,
+        "win_rate": 42.5,
+        "mean_excess": -0.383,
+        "beat_benchmark_rate": 41.2,
+        "excess_ci95": [
+          -0.659,
+          -0.123
+        ]
+      },
+      "t10": {
+        "n": 764,
+        "mean_net": -0.333,
+        "median_net": -0.913,
+        "win_rate": 44.4,
+        "mean_excess": -0.294,
+        "beat_benchmark_rate": 42.4,
+        "excess_ci95": [
+          -0.866,
+          0.321
+        ]
+      },
+      "t20": {
+        "n": 764,
+        "mean_net": 0.185,
+        "median_net": -1.711,
+        "win_rate": 44.9,
+        "mean_excess": -0.166,
+        "beat_benchmark_rate": 41.1,
+        "excess_ci95": [
+          -1.105,
+          0.763
+        ]
+      },
+      "label": "开发段",
+      "variant": "改前：向上突破确认日买入"
+    },
+    {
+      "signals": 485,
+      "stocks": 338,
+      "t5": {
+        "n": 483,
+        "mean_net": -0.313,
+        "median_net": -0.429,
+        "win_rate": 45.5,
+        "mean_excess": -0.395,
+        "beat_benchmark_rate": 42.7,
+        "excess_ci95": [
+          -1.095,
+          0.224
+        ]
+      },
+      "t10": {
+        "n": 483,
+        "mean_net": -0.705,
+        "median_net": -1.194,
+        "win_rate": 43.7,
+        "mean_excess": -0.58,
+        "beat_benchmark_rate": 41.4,
+        "excess_ci95": [
+          -1.48,
+          0.218
+        ]
+      },
+      "t20": {
+        "n": 483,
+        "mean_net": -0.239,
+        "median_net": -2.364,
+        "win_rate": 40.4,
+        "mean_excess": -0.712,
+        "beat_benchmark_rate": 37.9,
+        "excess_ci95": [
+          -2.031,
+          0.408
+        ]
+      },
+      "label": "留出段",
+      "variant": "改前：向上突破确认日买入"
+    },
+    {
+      "signals": 430,
+      "stocks": 301,
+      "t5": {
+        "n": 429,
+        "mean_net": -0.642,
+        "median_net": -0.621,
+        "win_rate": 44.1,
+        "mean_excess": -0.66,
+        "beat_benchmark_rate": 39.6,
+        "excess_ci95": [
+          -1.065,
+          -0.218
+        ]
+      },
+      "t10": {
+        "n": 429,
+        "mean_net": 0.044,
+        "median_net": -0.742,
+        "win_rate": 45.0,
+        "mean_excess": -0.394,
+        "beat_benchmark_rate": 40.6,
+        "excess_ci95": [
+          -1.179,
+          0.451
+        ]
+      },
+      "t20": {
+        "n": 429,
+        "mean_net": 0.33,
+        "median_net": -1.941,
+        "win_rate": 43.1,
+        "mean_excess": -0.53,
+        "beat_benchmark_rate": 38.7,
+        "excess_ci95": [
+          -1.8,
+          0.821
+        ]
+      },
+      "label": "开发段",
+      "variant": "改后：确认日量 ≥ 1.5 倍前 10 日均量"
+    },
+    {
+      "signals": 227,
+      "stocks": 195,
+      "t5": {
+        "n": 227,
+        "mean_net": -0.844,
+        "median_net": -1.063,
+        "win_rate": 42.7,
+        "mean_excess": -0.991,
+        "beat_benchmark_rate": 38.8,
+        "excess_ci95": [
+          -1.81,
+          -0.137
+        ]
+      },
+      "t10": {
+        "n": 227,
+        "mean_net": -1.594,
+        "median_net": -1.931,
+        "win_rate": 41.4,
+        "mean_excess": -1.622,
+        "beat_benchmark_rate": 33.9,
+        "excess_ci95": [
+          -2.574,
+          -0.721
+        ]
+      },
+      "t20": {
+        "n": 227,
+        "mean_net": -0.889,
+        "median_net": -2.539,
+        "win_rate": 41.0,
+        "mean_excess": -1.646,
+        "beat_benchmark_rate": 35.2,
+        "excess_ci95": [
+          -3.331,
+          -0.103
+        ]
+      },
+      "label": "留出段",
+      "variant": "改后：确认日量 ≥ 1.5 倍前 10 日均量"
+    }
+  ],
+  "missing_ratio": 0
+}

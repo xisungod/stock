@@ -82,6 +82,9 @@ class StrategyConfig:
     max_intraday_undercut_pct: float = 0.03
     max_intervening_close_break_pct: float = 0.015
     max_extension_pct: float = 0.035
+    # 三角整理确认日收盘离上沿的上限。None 表示不启用，默认扫描仍只认收盘突破。
+    # 数字用上面的 max_extension_pct，不单独再找一个阈值。
+    triangle_max_close_extension_pct: float | None = None
     # None preserves batches made before this filter existed; 0 is strict, not disabled.
     max_prebreakout_extension_pct: float | None = 0.50
     # Reject at this run length, not one day after it. None disables the duration filter.
@@ -98,6 +101,10 @@ class StrategyConfig:
     # 突破日至信号日的最高价越线超过该比例后又回到线附近，属冲高回落而不是回踩。
     # None 保留此规则之前的批次。
     max_post_breakout_runup_pct: float | None = None
+    # 回踩最低价相对这段最高价至少回落该比例，轻微回落不算确认。None 表示不设下限。
+    min_pullback_depth_pct: float | None = None
+    # 确认日收盘相对 MA 的上限。None 表示不限制已经涨离均线多远。
+    max_close_above_ma_pct: float | None = None
     # 买入预警要求突破前该根数之内有足够的独立验证（platform_events 为 confirmed_event_count，
     # legacy 为 min_line_strength）；更早的证据只保留展示。None 保留全历史计数的旧批次。
     max_event_age_bars: int | None = None
@@ -155,7 +162,11 @@ class StrategyConfig:
             raise ValueError("event counts must satisfy 2 <= candidate <= confirmed")
         if self.precision_engine == "platform_events" and self.lookback_days is not None:
             raise ValueError("platform_events uses full history; limit replay output instead")
-        for name in ("pullback_max_normal_volume_ratio", "max_post_breakout_runup_pct"):
+        for name in (
+            "pullback_max_normal_volume_ratio", "max_post_breakout_runup_pct",
+            "triangle_max_close_extension_pct", "min_pullback_depth_pct",
+            "max_close_above_ma_pct",
+        ):
             value = getattr(self, name)
             if value is not None and (isinstance(value, bool) or not np.isfinite(value) or value <= 0):
                 raise ValueError(f"{name} must be positive or None")
@@ -303,7 +314,9 @@ def build_strategy_config(params: dict[str, Any]) -> StrategyConfig:
     参数缺失表示该批次创建时规则尚不存在，一律按「未启用」解释，旧批次的结论不会被静默改写。
     新请求的默认值由 `app.schemas.ScanRequest` 给出。
     """
-    precision_enabled = params.get("strategy_mode") != "flag_breakout"
+    mode = params.get("strategy_mode", "precision_pullback")
+    # 旗形和三角整理都不套用精准线的回踩窗口。旧批次没有 strategy_mode 时仍是精准线。
+    precision_enabled = mode not in {"flag_breakout", "triangle_breakout"}
 
     def optional(name: str, cast):
         value = params.get(name)
@@ -322,9 +335,13 @@ def build_strategy_config(params: dict[str, Any]) -> StrategyConfig:
             if precision_enabled and params.get("max_pullback_days") is not None else None
         ),
         breakout_vol_mult=float(params.get("breakout_vol_mult") or 1.5),
-        # Older batches always required volume; do not silently change their signals.
-        require_breakout_volume=not precision_enabled or bool(params.get("require_breakout_volume", True)),
-        strategy_mode=params.get("strategy_mode", "precision_pullback"),
+        # Older precision batches always required volume. Flag keeps its own volume rule.
+        # Triangle confirmation is a close through the upper edge, not a volume gate.
+        require_breakout_volume=(
+            True if mode == "flag_breakout" else False if mode == "triangle_breakout"
+            else bool(params.get("require_breakout_volume", True))
+        ),
+        strategy_mode=mode,
         flag_direction=params.get("flag_direction", "all"),
         # An absent field in an old saved batch means the filter was not enabled.
         max_prebreakout_extension_pct=optional("max_prebreakout_extension_pct", float),
@@ -333,6 +350,7 @@ def build_strategy_config(params: dict[str, Any]) -> StrategyConfig:
         pullback_max_normal_volume_ratio=optional("pullback_max_normal_volume_ratio", float),
         max_post_breakout_runup_pct=optional("max_post_breakout_runup_pct", float),
         max_event_age_bars=optional("max_event_age_bars", int),
+        triangle_max_close_extension_pct=optional("triangle_max_close_extension_pct", float),
         market_filter=params.get("market_filter") or "off",
         **{name: params[name] for name in ("include_chart", "confirmed_event_count", "min_line_strength")
            if name in params},
@@ -403,6 +421,8 @@ def _run_pipeline(
         return _run_combined_pipeline(stock_code, stock_name, df_upto, cfg)
     if cfg.strategy_mode == "flag_breakout":
         outcome = _run_flag_pipeline(stock_code, stock_name, df_upto, cfg)
+    elif cfg.strategy_mode == "triangle_breakout":
+        outcome = _run_triangle_pipeline(stock_code, stock_name, df_upto, cfg)
     elif cfg.strategy_mode == "precision_pullback":
         outcome = _run_precision_pipeline(stock_code, stock_name, df_upto, cfg)
     else:
@@ -508,6 +528,129 @@ def _merge_pattern_results(stock_code, stock_name, df, cfg, precision, flag):
                 markers[(marker["date"], marker["type"])] = marker
         merged.chart["markers"] = list(markers.values())
     return "ok", merged.suggestion, merged
+
+
+def _triangle_volume(df: pd.DataFrame, index: int, cfg: StrategyConfig) -> tuple[bool, float | None]:
+    """放量门槛用策略里已有的 vol_lookback 与 breakout_vol_mult，不另设倍数。"""
+    from app.services.chart_patterns import confirmation_volume_ratio
+
+    ratio = confirmation_volume_ratio(df, index, cfg.vol_lookback)
+    if not cfg.require_breakout_volume:
+        return True, ratio
+    return ratio is not None and ratio >= cfg.breakout_vol_mult, ratio
+
+
+def _triangle_buy_result(stock_code: str, stock_name: str, df: pd.DataFrame, event: dict[str, Any], cfg: StrategyConfig) -> SignalResult:
+    index = int(event["signal_index"])
+    close = float(df["close"].iloc[index])
+    upper = float(event["upper"])
+    distance = (close / upper - 1) * 100 if upper else 0.0
+    stamp = _date_str(df["trade_date"].iloc[index])
+    detected = _date_str(df["trade_date"].iloc[int(event["detected_index"])])
+    accepted, ratio = _triangle_volume(df, index, cfg)
+    score = 55.0 + min(15.0, max(0.0, 0.6 - float(event["width_ratio"])) * 25)
+    reasons = [
+        "两峰两谷确立上下沿，共同区间收敛到起点宽度的 60% 以内",
+        f"识别日 {detected}，确认日 {stamp} 收盘高于上沿 0.5%",
+    ]
+    if ratio is not None:
+        reasons.append(f"确认日量是此前 {cfg.vol_lookback} 日均量的 {ratio:.2f} 倍")
+    extension = cfg.triangle_max_close_extension_pct
+    if extension is not None and upper > 0 and (close / upper - 1) > extension + 1e-12:
+        return SignalResult(
+            stock_code, stock_name, SignalCategory.WATCH, 45.0,
+            "观察机会：收盘越过三角形上沿，但离上沿超过近线带",
+            round(upper, 3), 4, stamp,
+            line_formation_date=detected, breakout_date=stamp, current_price=round(close, 3),
+            distance_to_line_pct=round(distance, 3), structure_score=45.0,
+            pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+            breakout_volume_ratio=None if ratio is None else round(ratio, 3),
+            require_breakout_volume=cfg.require_breakout_volume,
+            reasons=reasons + [f"收盘离上沿 {distance:.2f}%，超过 {extension * 100:g}%"],
+            risks=["买入要求确认日收盘离上沿不超过精准线同一条近线带。"],
+            breakout_status={"tags": ["离上沿过远"], "width_ratio": round(float(event["width_ratio"]), 3)},
+        )
+    if not accepted:
+        return SignalResult(
+            stock_code, stock_name, SignalCategory.WATCH, 45.0,
+            "观察机会：收盘越过三角形上沿，但确认日量能未达到放量门槛",
+            round(upper, 3), 4, stamp,
+            line_formation_date=detected, breakout_date=stamp, current_price=round(close, 3),
+            distance_to_line_pct=round(distance, 3), structure_score=45.0,
+            pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+            breakout_volume_ratio=None if ratio is None else round(ratio, 3),
+            require_breakout_volume=True, breakout_volume_threshold=cfg.breakout_vol_mult,
+            reasons=reasons,
+            risks=[f"买入要求确认日量不低于此前 {cfg.vol_lookback} 日均量的 {cfg.breakout_vol_mult:g} 倍。"],
+            breakout_status={"tags": ["越过上沿但量未确认"], "width_ratio": round(float(event["width_ratio"]), 3)},
+        )
+    return SignalResult(
+        stock_code, stock_name, SignalCategory.BUY_ALERT, score,
+        "买入预警：三角形整理向上突破，收盘越过上沿",
+        round(upper, 3), 4, stamp,
+        line_formation_date=detected, breakout_date=stamp, current_price=round(close, 3),
+        distance_to_line_pct=round(distance, 3), structure_score=score,
+        pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+        signal_event_id=f"{stock_code}:{event['event_id']}",
+        breakout_volume_ratio=None if ratio is None else round(ratio, 3),
+        require_breakout_volume=cfg.require_breakout_volume,
+        breakout_volume_threshold=cfg.breakout_vol_mult if cfg.require_breakout_volume else None,
+        reasons=reasons,
+        risks=["结构突破提醒。是否优于同日基准，以同一规则的分段验证为准。"],
+        breakout_status={"tags": ["向上突破"], "width_ratio": round(float(event["width_ratio"]), 3), "stop": round(float(event["stop"]), 3)},
+    )
+
+
+def iter_triangle_buy_results(stock_code: str, stock_name: str, df: pd.DataFrame, cfg: StrategyConfig, start_idx: int = 0):
+    """整段只跑一次认定。每个向上突破只在其确认日产出买入预警。放量门槛打开时，量不够的确认日不入选。"""
+    from app.services.chart_patterns import triangle_up_breakouts
+
+    for event in triangle_up_breakouts(df):
+        if event["signal_index"] < start_idx:
+            continue
+        result = _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+        if result.category == SignalCategory.BUY_ALERT:
+            yield event["signal_index"], result
+
+
+def _run_triangle_pipeline(
+    stock_code: str, stock_name: str, df: pd.DataFrame, cfg: StrategyConfig,
+) -> tuple[str, str, SignalResult | None]:
+    """扫描日只看这一根及以前。确认日是向上突破的收盘，收敛中只作为观察。"""
+    from app.services.chart_patterns import active_triangle, triangle_up_breakouts
+
+    last = len(df) - 1
+    event = next((item for item in triangle_up_breakouts(df) if item["signal_index"] == last), None)
+    if event is not None:
+        result = _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+        tags = (result.breakout_status or {}).get("tags") or []
+        if result.category == SignalCategory.BUY_ALERT:
+            stage = "ok"
+        elif "离上沿过远" in tags:
+            stage = "triangle_extended"
+        else:
+            stage = "triangle_volume_unconfirmed"
+        return stage, result.suggestion, result
+    active = active_triangle(df)
+    if active is None:
+        return "no_triangle", "截至信号日没有已确认的三角形向上突破", None
+    upper = float(active["upper"](last))
+    close = float(df["close"].iloc[last])
+    stamp = _date_str(df["trade_date"].iloc[last])
+    result = SignalResult(
+        stock_code, stock_name, SignalCategory.WATCH, 40.0,
+        "观察机会：三角形整理仍在收敛，等待收盘突破上沿",
+        round(upper, 3), len(active["pivots"]), stamp,
+        line_formation_date=_date_str(df["trade_date"].iloc[int(active["detected"])]),
+        current_price=round(close, 3),
+        distance_to_line_pct=round((close / upper - 1) * 100, 3) if upper else None,
+        structure_score=40.0, pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+        require_breakout_volume=False,
+        reasons=["上下沿已确立且仍在收敛，收盘尚未越过上沿 0.5%"],
+        risks=["收敛中不是买入预警。"],
+        breakout_status={"tags": ["收敛中"], "width_ratio": round(float(active["width_ratio"]), 3)},
+    )
+    return "ok", result.suggestion, result
 
 
 def _run_flag_pipeline(
@@ -1353,7 +1496,7 @@ def _pullback_check(
 
 PULLBACK_CONDITIONS = (
     "in_window", "touched", "recovered", "not_extended", "shrink_vs_breakout",
-    "held_line", "normal_volume_ok", "runup_ok",
+    "held_line", "normal_volume_ok", "runup_ok", "depth_ok", "ma_extension_ok",
 )
 
 
@@ -1386,10 +1529,25 @@ def _pullback_conditions(df: pd.DataFrame, line_price: float, breakout: dict[str
         # 无法核验常态量（历史太短）时不放行：规则启用后宁缺毋滥。
         "normal_volume_ok": limit is None or (normal_ratio is not None and normal_ratio <= limit + 1e-12),
         "runup_ok": runup_limit is None or peak <= line_price * (1 + runup_limit) * (1 + 1e-12),
+        # 从突破后最高价回落的幅度。不看最低价离线多远，也不看收盘是否站回线。
+        "depth_ok": cfg.min_pullback_depth_pct is None or (
+            peak > 0 and (peak - low) / peak + 1e-12 >= cfg.min_pullback_depth_pct
+        ),
+        "ma_extension_ok": _close_not_extended_above_ma(df, close, cfg),
         "volume_ratio": volume / breakout_volume if breakout_volume > 0 else None,
         "normal_volume_ratio": normal_ratio,
         "max_runup_pct": (peak / line_price - 1) * 100 if line_price > 0 else None,
     }
+
+
+def _close_not_extended_above_ma(df: pd.DataFrame, close: float, cfg: StrategyConfig) -> bool:
+    """确认日收盘不能高出均线超过上限。只用截至信号日的收盘，规则关闭时直接通过。"""
+    limit = cfg.max_close_above_ma_pct
+    if limit is None:
+        return True
+    periods = min(cfg.ma_period, max(5, cfg.ma_period // 2))
+    average = float(df["close"].rolling(cfg.ma_period, min_periods=periods).mean().iloc[-1])
+    return bool(np.isfinite(average) and average > 0 and close <= average * (1 + limit) + 1e-12)
 
 
 def _confirm_pullback(df: pd.DataFrame, line_price: float, breakout: dict[str, Any], cfg: StrategyConfig) -> dict[str, Any] | None:

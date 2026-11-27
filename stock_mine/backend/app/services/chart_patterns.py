@@ -24,6 +24,12 @@ BREAK_PCT = 0.015
 TRIANGLE_BREAK_PCT = 0.005
 TRIANGLE_MIN_SHARED_BARS = 15
 TRIANGLE_MAX_FIRST_SWING_RATIO = 1.5
+# 扫描默认仍是两峰两谷。3 表示上下沿在突破前都必须再被确认触到一次，本轮只作对照，不改默认。
+TRIANGLE_MIN_TOUCHES_PER_SIDE = 2
+# 后峰可以比前峰高 1%，后谷可以比前谷低 1%。0 表示上沿不许上升、下沿不许下降。默认仍是 1%。
+TRIANGLE_EDGE_SLACK = 0.01
+# 四个锚点从第一点到第四点的跨度上限。默认 100 根；更短的窗口只作对照。
+TRIANGLE_MAX_SPAN_BARS = 100
 WAIT_BARS = 40
 MAX_DRAWN = 200  # 只为防止异常数据撑大接口；正常全历史也到不了这么多
 PATTERN_NOTE = "只用已确认峰谷和已收盘 K 线识别，形态仅作结构参考。"
@@ -93,7 +99,37 @@ def find_w_bottoms(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
     return out
 
 
-def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[str, Any]]:
+def find_triangles(
+    piv: list[dict[str, Any]],
+    close: np.ndarray,
+    edge_slack: float = TRIANGLE_EDGE_SLACK,
+    max_rail_deviation_pct: float | None = None,
+    high: np.ndarray | None = None,
+    low: np.ndarray | None = None,
+    min_span_bars: int = 0,
+    max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
+    max_slope_balance: float | None = None,
+    min_bars_to_apex: int | None = None,
+    ascending_flat_pct: float | None = None,
+    descending_flat_pct: float | None = None,
+    min_height_pct: float | None = None,
+    max_height_pct: float | None = None,
+) -> list[dict[str, Any]]:
+    if min_span_bars < 0 or max_span_bars < min_span_bars:
+        raise ValueError("整理跨度窗口不成立")
+    if max_slope_balance is not None and (not np.isfinite(max_slope_balance) or max_slope_balance < 1):
+        raise ValueError("对称倍数不能小于 1")
+    if min_bars_to_apex is not None and (isinstance(min_bars_to_apex, bool) or not isinstance(min_bars_to_apex, int) or min_bars_to_apex < 1):
+        raise ValueError("到顶点的剩余根数必须是正整数")
+    if ascending_flat_pct is not None and (not np.isfinite(ascending_flat_pct) or ascending_flat_pct < 0 or ascending_flat_pct >= 1):
+        raise ValueError("上升三角的上沿走平幅度必须在 [0, 1)")
+    if descending_flat_pct is not None and (not np.isfinite(descending_flat_pct) or descending_flat_pct < 0 or descending_flat_pct >= 1):
+        raise ValueError("下降三角的下沿走平幅度必须在 [0, 1)")
+    for name, value in (("min_height_pct", min_height_pct), ("max_height_pct", max_height_pct)):
+        if value is not None and (not np.isfinite(value) or value < 0 or value >= 1):
+            raise ValueError("形态高度必须在 [0, 1)")
+    if min_height_pct is not None and max_height_pct is not None and min_height_pct > max_height_pct:
+        raise ValueError("形态高度下限不能大于上限")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -104,7 +140,7 @@ def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
             previous = out[-1]
             if t0 < previous["end"] or previous["outcome"] != "changed":
                 continue
-        if x1 - x0 > 100:
+        if x1 - x0 < min_span_bars or x1 - x0 > max_span_bars:
             continue
         a, b = [p for p in four if p["kind"] == "P"]
         d, e = [p for p in four if p["kind"] == "V"]
@@ -112,10 +148,31 @@ def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
         shared_span = x1 - shared_start
         if shared_span < TRIANGLE_MIN_SHARED_BARS or 2 * shared_span < x1 - x0:
             continue
-        if not (b["price"] <= a["price"] * 1.01 and e["price"] >= d["price"] * 0.99):
+        if edge_slack < 0:
+            raise ValueError("边界容差不能为负")
+        if not (b["price"] <= a["price"] * (1 + edge_slack) and e["price"] >= d["price"] * (1 - edge_slack)):
             continue
         up_slope = (b["price"] - a["price"]) / (b["idx"] - a["idx"])
         lo_slope = (e["price"] - d["price"]) / (e["idx"] - d["idx"])
+        # 默认不分类。打开后只留上升三角：下沿抬高，上沿跌幅不超过给定百分比。
+        # 后峰仍不得高出前峰超过边界容差。不够的四点组合不成立，后面的峰谷可以另组。
+        if ascending_flat_pct is not None and not (
+            e["price"] > d["price"] and b["price"] + 1e-12 >= a["price"] * (1 - ascending_flat_pct)
+        ):
+            continue
+        # 打开后只留下降三角：上沿下降，下沿涨幅不超过给定百分比。
+        # 后谷仍不得低于前谷超过边界容差。
+        if descending_flat_pct is not None and not (
+            b["price"] < a["price"] and e["price"] <= d["price"] * (1 + descending_flat_pct) + 1e-12
+        ):
+            continue
+        # 默认不区分对称、上升、下降。打开后，较陡一边的斜率绝对值不得超过较缓一边的该倍数。
+        # 一边几乎走平就不算对称，这组边界不成立，后面的峰谷可以另组三角形。
+        if max_slope_balance is not None:
+            steep = max(abs(up_slope), abs(lo_slope))
+            flat = min(abs(up_slope), abs(lo_slope))
+            if flat <= 0 or steep / flat > max_slope_balance + 1e-12:
+                continue
         upper = lambda x, a=a, s=up_slope: a["price"] + s * (x - a["idx"])  # noqa: E731
         lower = lambda x, d=d, s=lo_slope: d["price"] + s * (x - d["idx"])  # noqa: E731
         w0, w1 = upper(shared_start) - lower(shared_start), upper(x1) - lower(x1)
@@ -128,11 +185,36 @@ def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
         apex = x1 + w1 / (lo_slope - up_slope)
         if t0 >= apex:
             continue
+        # 默认只要确认日还没到顶点。打开后，两轨相交至少还要这么多根，马上收口的不算。
+        if min_bars_to_apex is not None and apex - t0 < min_bars_to_apex:
+            continue
+        # 打开后，第四个锚点确认时上下沿高度占收盘的比例必须落在给定区间。太扁或太高都不成立。
+        if min_height_pct is not None or max_height_pct is not None:
+            spot = float(close[t0])
+            gap = float(upper(t0) - lower(t0))
+            height = gap / spot if spot > 0 else -1.0
+            if not np.isfinite(height) or (min_height_pct is not None and height < min_height_pct) or (
+                max_height_pct is not None and height > max_height_pct
+            ):
+                continue
         forming_days = np.arange(shared_start, t0 + 1)
         forming_closes = close[shared_start:t0 + 1]
         if (np.any(forming_closes > upper(forming_days) * (1 + TRIANGLE_BREAK_PCT))
                 or np.any(forming_closes < lower(forming_days) * (1 - TRIANGLE_BREAK_PCT))):
             continue
+        # 默认只约束收盘。打开后，形成期内最高价和最低价也不得偏离上下沿超过同一百分比。
+        # 超限的四点组合不成立，后面的峰谷可以组成另一个三角形。突破日本身不在这段里。
+        if max_rail_deviation_pct is not None:
+            if max_rail_deviation_pct < 0:
+                raise ValueError("价格偏离上下沿的上限不能为负")
+            if high is None or low is None or len(high) != n or len(low) != n:
+                raise ValueError("限制价格偏离上下沿时必须提供与收盘等长的最高价和最低价")
+            forming_high = high[shared_start:t0 + 1]
+            forming_low = low[shared_start:t0 + 1]
+            if (np.any(~np.isfinite(forming_high)) or np.any(~np.isfinite(forming_low))
+                    or np.any(forming_high > upper(forming_days) * (1 + max_rail_deviation_pct))
+                    or np.any(forming_low < lower(forming_days) * (1 - max_rail_deviation_pct))):
+                continue
         item = {"pivots": four, "start": x0, "upper_start": a["idx"], "lower_start": d["idx"],
                 "detected": t0, "stop": e["price"] * (1 - BREAK_PCT),
                 "upper": upper, "lower": lower, "width_ratio": w1 / w0, "direction": None, "entry": None}
@@ -219,3 +301,110 @@ def detect_chart_patterns(bars: pd.DataFrame, dates: list[str]) -> dict[str, Any
         })
     return {**empty, "w_bottoms": w_items, "triangles": t_items,
             "as_of": dates[len(bars) - 1] if dates else None}
+
+
+def confirmation_volume_ratio(bars: pd.DataFrame, index: int, lookback: int = 10) -> float | None:
+    """确认日成交量除以确认日之前 lookback 根的均量。
+
+    均量不含确认日本身，与精准线突破量比同一口径。历史不足、成交量缺失或均量为 0 时返回 None，
+    调用方不得把缺失当成放量通过。
+    """
+    if lookback < 1 or index < 1 or index >= len(bars):
+        return None
+    volume = bars["volume"].astype(float)
+    history = volume.iloc[max(0, index - lookback):index]
+    if len(history) < min(5, lookback):
+        return None
+    current = float(volume.iloc[index])
+    average = float(history.mean())
+    if not np.isfinite(current) or current < 0 or not np.isfinite(average) or average <= 0:
+        return None
+    return current / average
+
+
+def _rail_touches(pivots: list[dict[str, Any]]) -> tuple[int, int]:
+    """突破前已经被收进边界的峰、谷个数。确认日当天才确认的新点还不在这张表里。"""
+    peaks = sum(1 for pivot in pivots if pivot["kind"] == "P")
+    valleys = sum(1 for pivot in pivots if pivot["kind"] == "V")
+    return peaks, valleys
+
+
+def triangle_up_breakouts(
+    bars: pd.DataFrame,
+    min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE,
+    edge_slack: float = TRIANGLE_EDGE_SLACK,
+    max_rail_deviation_pct: float | None = None,
+    min_span_bars: int = 0,
+    max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
+    max_slope_balance: float | None = None,
+    min_bars_to_apex: int | None = None,
+    ascending_flat_pct: float | None = None,
+    descending_flat_pct: float | None = None,
+    min_height_pct: float | None = None,
+    max_height_pct: float | None = None,
+) -> list[dict[str, Any]]:
+    """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
+
+    默认上下沿各 2 个触点就够，与现行扫描一致。`min_touches_per_side=3` 时，
+    突破之前上沿至少还要被一个峰、下沿至少还要被一个谷确认贴住，否则这次收盘突破不算这个形态。
+    触点只计确认日早于突破检查的点，不看突破日之后的峰谷。
+    `max_rail_deviation_pct` 默认关闭。打开后，形成期内最高价高出上沿、最低价低于下沿
+    不得超过这个百分比，否则这组边界不成立。
+    四个锚点的跨度默认不超过 100 根。`min_span_bars` / `max_span_bars` 用来改这个窗口。
+    `max_slope_balance` 默认关闭。打开后只保留两边斜率绝对值相差不超过该倍数的对称三角。
+    `min_bars_to_apex` 默认关闭。打开后，第四个锚点确认时，两轨相交至少还要这么多根。
+    `ascending_flat_pct` 默认关闭。打开后只留上升三角：下沿抬高，上沿跌幅不超过该比例。
+    `descending_flat_pct` 默认关闭。打开后只留下降三角：上沿下降，下沿涨幅不超过该比例。
+    `min_height_pct` / `max_height_pct` 默认关闭。打开后，第四个锚点确认时上下沿高度占收盘的比例必须落在这个区间。
+    """
+    if min_touches_per_side < 2:
+        raise ValueError("每边触点至少为 2")
+    if len(bars) < 30:
+        return []
+    close = bars["close"].to_numpy(dtype=float)
+    high = bars["high"].to_numpy(dtype=float)
+    low = bars["low"].to_numpy(dtype=float)
+    events = []
+    for triangle in find_triangles(
+        pattern_pivots(bars), close, edge_slack=edge_slack,
+        max_rail_deviation_pct=max_rail_deviation_pct, high=high, low=low,
+        min_span_bars=min_span_bars, max_span_bars=max_span_bars,
+        max_slope_balance=max_slope_balance,
+        min_bars_to_apex=min_bars_to_apex,
+        ascending_flat_pct=ascending_flat_pct,
+        descending_flat_pct=descending_flat_pct,
+        min_height_pct=min_height_pct,
+        max_height_pct=max_height_pct,
+    ):
+        entry = triangle.get("entry")
+        if entry is None:
+            continue
+        peaks, valleys = _rail_touches(triangle["pivots"])
+        if peaks < min_touches_per_side or valleys < min_touches_per_side:
+            continue
+        upper = float(triangle["upper"](entry))
+        events.append({
+            "signal_index": int(entry),
+            "detected_index": int(triangle["detected"]),
+            "start_index": int(triangle["start"]),
+            "upper": upper,
+            "stop": float(triangle["stop"]),
+            "width_ratio": float(triangle["width_ratio"]),
+            "peak_touches": peaks,
+            "valley_touches": valleys,
+            "event_id": f"triangle:{int(triangle['start'])}:{int(entry)}",
+        })
+    return events
+
+
+def active_triangle(bars: pd.DataFrame) -> dict[str, Any] | None:
+    """最后一根仍落在尚未突破的三角形里时，返回该形态，供扫描标成观察而不是买入。"""
+    if len(bars) < 30:
+        return None
+    close = bars["close"].to_numpy(dtype=float)
+    last = len(close) - 1
+    found = None
+    for triangle in find_triangles(pattern_pivots(bars), close):
+        if triangle.get("outcome") == "active" and triangle["detected"] <= last <= triangle["end"]:
+            found = triangle
+    return found

@@ -1,0 +1,176 @@
+{
+  "generated_at": "2026-11-27T15:02:38",
+  "limit_pct": 3.5000000000000004,
+  "retained": false,
+  "meets_validity_standard": false,
+  "rows": [
+    {
+      "signals": 766,
+      "stocks": 420,
+      "t5": {
+        "n": 764,
+        "mean_net": -0.546,
+        "median_net": -0.8,
+        "win_rate": 42.5,
+        "mean_excess": -0.383,
+        "beat_benchmark_rate": 41.2,
+        "excess_ci95": [
+          -0.659,
+          -0.123
+        ]
+      },
+      "t10": {
+        "n": 764,
+        "mean_net": -0.333,
+        "median_net": -0.913,
+        "win_rate": 44.4,
+        "mean_excess": -0.294,
+        "beat_benchmark_rate": 42.4,
+        "excess_ci95": [
+          -0.866,
+          0.321
+        ]
+      },
+      "t20": {
+        "n": 764,
+        "mean_net": 0.185,
+        "median_net": -1.711,
+        "win_rate": 44.9,
+        "mean_excess": -0.166,
+        "beat_benchmark_rate": 41.1,
+        "excess_ci95": [
+          -1.105,
+          0.763
+        ]
+      },
+      "label": "开发段",
+      "variant": "改前：收盘越过上沿就买入"
+    },
+    {
+      "signals": 611,
+      "stocks": 374,
+      "t5": {
+        "n": 611,
+        "mean_net": -0.338,
+        "median_net": -0.673,
+        "win_rate": 43.2,
+        "mean_excess": -0.105,
+        "beat_benchmark_rate": 41.7,
+        "excess_ci95": [
+          -0.419,
+          0.193
+        ]
+      },
+      "t10": {
+        "n": 611,
+        "mean_net": 0.244,
+        "median_net": -0.439,
+        "win_rate": 47.1,
+        "mean_excess": 0.33,
+        "beat_benchmark_rate": 45.3,
+        "excess_ci95": [
+          -0.396,
+          1.061
+        ]
+      },
+      "t20": {
+        "n": 611,
+        "mean_net": 0.673,
+        "median_net": -1.381,
+        "win_rate": 46.3,
+        "mean_excess": 0.294,
+        "beat_benchmark_rate": 42.4,
+        "excess_ci95": [
+          -0.783,
+          1.348
+        ]
+      },
+      "label": "开发段",
+      "variant": "改后：收盘离上沿不超过 3.5%"
+    },
+    {
+      "signals": 485,
+      "stocks": 338,
+      "t5": {
+        "n": 483,
+        "mean_net": -0.313,
+        "median_net": -0.429,
+        "win_rate": 45.5,
+        "mean_excess": -0.395,
+        "beat_benchmark_rate": 42.7,
+        "excess_ci95": [
+          -1.095,
+          0.224
+        ]
+      },
+      "t10": {
+        "n": 483,
+        "mean_net": -0.705,
+        "median_net": -1.194,
+        "win_rate": 43.7,
+        "mean_excess": -0.58,
+        "beat_benchmark_rate": 41.4,
+        "excess_ci95": [
+          -1.48,
+          0.218
+        ]
+      },
+      "t20": {
+        "n": 483,
+        "mean_net": -0.239,
+        "median_net": -2.364,
+        "win_rate": 40.4,
+        "mean_excess": -0.712,
+        "beat_benchmark_rate": 37.9,
+        "excess_ci95": [
+          -2.031,
+          0.408
+        ]
+      },
+      "label": "留出段",
+      "variant": "改前：收盘越过上沿就买入"
+    },
+    {
+      "signals": 391,
+      "stocks": 287,
+      "t5": {
+        "n": 389,
+        "mean_net": 0.099,
+        "median_net": -0.2,
+        "win_rate": 48.1,
+        "mean_excess": -0.029,
+        "beat_benchmark_rate": 44.5,
+        "excess_ci95": [
+          -0.686,
+          0.579
+        ]
+      },
+      "t10": {
+        "n": 389,
+        "mean_net": -0.362,
+        "median_net": -0.746,
+        "win_rate": 45.5,
+        "mean_excess": -0.183,
+        "beat_benchmark_rate": 43.4,
+        "excess_ci95": [
+          -1.078,
+          0.629
+        ]
+      },
+      "t20": {
+        "n": 389,
+        "mean_net": -0.15,
+        "median_net": -2.033,
+        "win_rate": 40.4,
+        "mean_excess": -0.379,
+        "beat_benchmark_rate": 38.3,
+        "excess_ci95": [
+          -1.686,
+          0.864
+        ]
+      },
+      "label": "留出段",
+      "variant": "改后：收盘离上沿不超过 3.5%"
+    }
+  ]
+}

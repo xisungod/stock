@@ -313,7 +313,10 @@ def evaluate_bars(
     raw: dict[int, Any] = {}
     pattern_events: list[dict[str, Any]] = []
     seen_events: set[tuple[str, str]] = set()
-    if cfg.precision_engine == "platform_events" and cfg.strategy_mode != "flag_breakout":
+    if cfg.strategy_mode == "triangle_breakout":
+        from app.services.strategy import iter_triangle_buy_results
+        evaluated = iter_triangle_buy_results(stock_code, stock_name, df, cfg, start_idx)
+    elif cfg.precision_engine == "platform_events" and cfg.strategy_mode != "flag_breakout":
         from app.services.platform_events import iter_platform_results
         evaluated = iter_platform_results(stock_code, stock_name, df, cfg, start_idx)
     else:
@@ -340,7 +343,7 @@ def evaluate_bars(
     signals: list[dict[str, Any]] = []
     if not dedupe:
         selected_indices = sorted(raw)
-    elif cfg.precision_engine == "platform_events":
+    elif cfg.strategy_mode == "triangle_breakout" or cfg.precision_engine == "platform_events":
         selected_indices = dedupe_event_signals(raw)
     else:
         selected_indices = dedupe_signal_indices(raw, min_signal_gap)

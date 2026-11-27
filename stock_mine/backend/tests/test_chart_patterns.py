@@ -91,6 +91,14 @@ def triangle_pivots(*touches):
             for kind, index, price in touches]
 
 
+def test_zero_edge_slack_rejects_a_slightly_rising_upper_rail():
+    rising = triangle_pivots(("P", 0, 13.0), ("V", 8, 10.0), ("P", 30, 13.05), ("V", 50, 11.6))
+    close = np.full(70, 11.8)
+    close[56] = 14.0
+    assert find_triangles(rising, close) != []
+    assert find_triangles(rising, close, edge_slack=0.0) == []
+
+
 def test_triangle_rejects_a_support_anchor_from_the_prior_rally():
     pivots = triangle_pivots(("V", 0, 10.0), ("P", 40, 20.0), ("V", 45, 16.0), ("P", 50, 20.0))
     close = np.linspace(10.0, 20.0, 56)
@@ -120,6 +128,96 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     (triangle,) = find_triangles(pivots, close)
     assert triangle["detected"] == 42
     assert triangle["direction"] == "up" and triangle["end"] == 48
+
+
+def test_height_band_rejects_a_flat_channel_and_keeps_a_normal_one():
+    """确认时上下沿只有约 2% 太扁。大约 10% 的高度留在 4%～15% 里。"""
+    flat_close = np.full(60, 11.5)
+    flat_close[48] = 12.8
+    flat = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.4), ("V", 40, 11.4))
+    assert find_triangles(flat, flat_close) != []
+    assert find_triangles(flat, flat_close, min_height_pct=0.04, max_height_pct=0.15) == []
+    normal_close = np.full(55, 11.5)
+    normal_close[48] = 12.6
+    normal = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(normal, normal_close, min_height_pct=0.04, max_height_pct=0.15) != []
+
+
+def test_descending_flat_keeps_a_level_base_and_rejects_a_rising_one():
+    """下沿抬高约 9% 时默认仍认定；下降三角要求下沿涨幅不超过 3%，且上沿下降。"""
+    close = np.full(55, 11.5)
+    close[48] = 12.6
+    rising_base = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(rising_base, close) != []
+    assert find_triangles(rising_base, close, descending_flat_pct=0.03) == []
+    level_base = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.4), ("V", 40, 10.2))
+    level_close = np.full(55, 11.0)
+    level_close[48] = 13.0
+    assert find_triangles(level_base, level_close, descending_flat_pct=0.03) != []
+
+
+def test_ascending_flat_keeps_a_nearly_level_top_and_rejects_a_falling_one():
+    """上沿跌约 3.1% 时默认仍认定；3% 走平上限不认。上沿跌约 2.3% 且下沿抬高才留下。"""
+    close = np.full(55, 11.5)
+    close[48] = 12.6
+    falling = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(falling, close) != []
+    assert find_triangles(falling, close, ascending_flat_pct=0.03) == []
+    flat = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.7), ("V", 40, 10.9))
+    assert find_triangles(flat, close, ascending_flat_pct=0.03) != []
+
+
+def test_ten_bars_to_apex_rejects_a_triangle_about_to_close():
+    """确认日离顶点只剩一两根时，默认仍可突破。要求至少还剩 10 根时，这组边界不成立。"""
+    tight = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 11.9))
+    tight_close = np.full(50, 12.05)
+    tight_close[43] = 12.4
+    assert find_triangles(tight, tight_close) != []
+    assert find_triangles(tight, tight_close, min_bars_to_apex=10) == []
+    roomy = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    roomy_close = np.full(55, 11.5)
+    roomy_close[48] = 12.2
+    assert find_triangles(roomy, roomy_close, min_bars_to_apex=10) != []
+
+
+def test_symmetric_balance_rejects_a_nearly_flat_lower_rail():
+    """下沿几乎走平时，默认仍认定。较陡一边不得超过较缓一边的 2 倍时，这组边界不成立。"""
+    tilted = triangle_pivots(("P", 0, 16.0), ("V", 10, 10.0), ("P", 30, 13.5), ("V", 55, 10.8))
+    close = np.full(70, 11.0)
+    close[59] = 11.6
+    assert find_triangles(tilted, close) != []
+    assert find_triangles(tilted, close, max_slope_balance=2.0) == []
+    balanced = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    balanced_close = np.full(55, 11.5)
+    balanced_close[48] = 12.2
+    assert find_triangles(balanced, balanced_close, max_slope_balance=2.0) != []
+
+
+def test_span_window_rejects_a_consolidation_longer_than_sixty_bars():
+    """四个锚点跨度 80 根时，默认仍认定；收到 20～60 根后这组边界不成立。"""
+    pivots = triangle_pivots(("P", 0, 13.0), ("V", 20, 10.0), ("P", 50, 12.5), ("V", 80, 11.2))
+    close = np.full(100, 11.5)
+    close[85] = 12.5
+    assert find_triangles(pivots, close) != []
+    assert find_triangles(pivots, close, min_span_bars=20, max_span_bars=60) == []
+    short = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    short_close = np.full(55, 11.5)
+    short_close[48] = 12.2
+    assert find_triangles(short, short_close, min_span_bars=20, max_span_bars=60) != []
+
+
+def test_rail_deviation_rejects_a_high_above_the_upper_rail():
+    """收盘留在轨道内时，默认仍认定。最高价高出上沿超过 0.5% 时，这组边界不成立。"""
+    pivots = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    close = np.full(55, 11.5)
+    close[48] = 12.2
+    high = close * 1.002
+    low = close * 0.998
+    high[30] = 12.4 * 1.02  # 第 30 根上沿是 12.4，最高价高出 2%。
+    assert find_triangles(pivots, close, high=high, low=low) != []
+    assert find_triangles(pivots, close, high=high, low=low, max_rail_deviation_pct=0.005) == []
+    high[30] = 12.4 * 1.003
+    assert find_triangles(pivots, close, high=high, low=low, max_rail_deviation_pct=0.005) != []
 
 
 def test_triangle_rejects_a_close_outside_the_channel_during_formation():

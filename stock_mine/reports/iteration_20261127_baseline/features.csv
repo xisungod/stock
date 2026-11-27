@@ -1,0 +1,5 @@
+﻿feature,label,auc,z,auc_dev,auc_holdout,stable,median_win,median_loss,wins,losses
+normal_volume_ratio,回踩日量 / 突破前10日均量,0.493,-0.88,0.502,0.478,False,0.821,0.832,2499,2834
+runup_pct,突破后最高越线 %,0.498,-0.28,0.495,0.503,False,4.552,4.617,2499,2834
+line_points,精准线独立验证事件数,0.506,0.71,0.509,0.498,False,9.0,9.0,2499,2834
+calendar_gap,突破日到信号日的自然日间隔,0.514,1.74,0.505,0.527,False,4.0,4.0,2499,2834
