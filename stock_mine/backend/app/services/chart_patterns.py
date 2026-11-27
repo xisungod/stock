@@ -108,9 +108,12 @@ def find_triangles(
     low: np.ndarray | None = None,
     min_span_bars: int = 0,
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
+    max_slope_balance: float | None = None,
 ) -> list[dict[str, Any]]:
     if min_span_bars < 0 or max_span_bars < min_span_bars:
         raise ValueError("整理跨度窗口不成立")
+    if max_slope_balance is not None and (not np.isfinite(max_slope_balance) or max_slope_balance < 1):
+        raise ValueError("对称倍数不能小于 1")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -135,6 +138,13 @@ def find_triangles(
             continue
         up_slope = (b["price"] - a["price"]) / (b["idx"] - a["idx"])
         lo_slope = (e["price"] - d["price"]) / (e["idx"] - d["idx"])
+        # 默认不区分对称、上升、下降。打开后，较陡一边的斜率绝对值不得超过较缓一边的该倍数。
+        # 一边几乎走平就不算对称，这组边界不成立，后面的峰谷可以另组三角形。
+        if max_slope_balance is not None:
+            steep = max(abs(up_slope), abs(lo_slope))
+            flat = min(abs(up_slope), abs(lo_slope))
+            if flat <= 0 or steep / flat > max_slope_balance + 1e-12:
+                continue
         upper = lambda x, a=a, s=up_slope: a["price"] + s * (x - a["idx"])  # noqa: E731
         lower = lambda x, d=d, s=lo_slope: d["price"] + s * (x - d["idx"])  # noqa: E731
         w0, w1 = upper(shared_start) - lower(shared_start), upper(x1) - lower(x1)
@@ -286,6 +296,7 @@ def triangle_up_breakouts(
     max_rail_deviation_pct: float | None = None,
     min_span_bars: int = 0,
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
+    max_slope_balance: float | None = None,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
@@ -295,6 +306,7 @@ def triangle_up_breakouts(
     `max_rail_deviation_pct` 默认关闭。打开后，形成期内最高价高出上沿、最低价低于下沿
     不得超过这个百分比，否则这组边界不成立。
     四个锚点的跨度默认不超过 100 根。`min_span_bars` / `max_span_bars` 用来改这个窗口。
+    `max_slope_balance` 默认关闭。打开后只保留两边斜率绝对值相差不超过该倍数的对称三角。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
@@ -308,6 +320,7 @@ def triangle_up_breakouts(
         pattern_pivots(bars), close, edge_slack=edge_slack,
         max_rail_deviation_pct=max_rail_deviation_pct, high=high, low=low,
         min_span_bars=min_span_bars, max_span_bars=max_span_bars,
+        max_slope_balance=max_slope_balance,
     ):
         entry = triangle.get("entry")
         if entry is None:

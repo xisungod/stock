@@ -130,6 +130,19 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_symmetric_balance_rejects_a_nearly_flat_lower_rail():
+    """下沿几乎走平时，默认仍认定。较陡一边不得超过较缓一边的 2 倍时，这组边界不成立。"""
+    tilted = triangle_pivots(("P", 0, 16.0), ("V", 10, 10.0), ("P", 30, 13.5), ("V", 55, 10.8))
+    close = np.full(70, 11.0)
+    close[59] = 11.6
+    assert find_triangles(tilted, close) != []
+    assert find_triangles(tilted, close, max_slope_balance=2.0) == []
+    balanced = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    balanced_close = np.full(55, 11.5)
+    balanced_close[48] = 12.2
+    assert find_triangles(balanced, balanced_close, max_slope_balance=2.0) != []
+
+
 def test_span_window_rejects_a_consolidation_longer_than_sixty_bars():
     """四个锚点跨度 80 根时，默认仍认定；收到 20～60 根后这组边界不成立。"""
     pivots = triangle_pivots(("P", 0, 13.0), ("V", 20, 10.0), ("P", 50, 12.5), ("V", 80, 11.2))
