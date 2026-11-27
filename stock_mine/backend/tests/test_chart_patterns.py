@@ -130,6 +130,20 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_rail_deviation_rejects_a_high_above_the_upper_rail():
+    """收盘留在轨道内时，默认仍认定。最高价高出上沿超过 0.5% 时，这组边界不成立。"""
+    pivots = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    close = np.full(55, 11.5)
+    close[48] = 12.2
+    high = close * 1.002
+    low = close * 0.998
+    high[30] = 12.4 * 1.02  # 第 30 根上沿是 12.4，最高价高出 2%。
+    assert find_triangles(pivots, close, high=high, low=low) != []
+    assert find_triangles(pivots, close, high=high, low=low, max_rail_deviation_pct=0.005) == []
+    high[30] = 12.4 * 1.003
+    assert find_triangles(pivots, close, high=high, low=low, max_rail_deviation_pct=0.005) != []
+
+
 def test_triangle_rejects_a_close_outside_the_channel_during_formation():
     pivots = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
     close = np.full(55, 11.5)

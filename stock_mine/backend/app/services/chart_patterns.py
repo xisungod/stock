@@ -97,7 +97,14 @@ def find_w_bottoms(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
     return out
 
 
-def find_triangles(piv: list[dict[str, Any]], close: np.ndarray, edge_slack: float = TRIANGLE_EDGE_SLACK) -> list[dict[str, Any]]:
+def find_triangles(
+    piv: list[dict[str, Any]],
+    close: np.ndarray,
+    edge_slack: float = TRIANGLE_EDGE_SLACK,
+    max_rail_deviation_pct: float | None = None,
+    high: np.ndarray | None = None,
+    low: np.ndarray | None = None,
+) -> list[dict[str, Any]]:
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -139,6 +146,19 @@ def find_triangles(piv: list[dict[str, Any]], close: np.ndarray, edge_slack: flo
         if (np.any(forming_closes > upper(forming_days) * (1 + TRIANGLE_BREAK_PCT))
                 or np.any(forming_closes < lower(forming_days) * (1 - TRIANGLE_BREAK_PCT))):
             continue
+        # 默认只约束收盘。打开后，形成期内最高价和最低价也不得偏离上下沿超过同一百分比。
+        # 超限的四点组合不成立，后面的峰谷可以组成另一个三角形。突破日本身不在这段里。
+        if max_rail_deviation_pct is not None:
+            if max_rail_deviation_pct < 0:
+                raise ValueError("价格偏离上下沿的上限不能为负")
+            if high is None or low is None or len(high) != n or len(low) != n:
+                raise ValueError("限制价格偏离上下沿时必须提供与收盘等长的最高价和最低价")
+            forming_high = high[shared_start:t0 + 1]
+            forming_low = low[shared_start:t0 + 1]
+            if (np.any(~np.isfinite(forming_high)) or np.any(~np.isfinite(forming_low))
+                    or np.any(forming_high > upper(forming_days) * (1 + max_rail_deviation_pct))
+                    or np.any(forming_low < lower(forming_days) * (1 - max_rail_deviation_pct))):
+                continue
         item = {"pivots": four, "start": x0, "upper_start": a["idx"], "lower_start": d["idx"],
                 "detected": t0, "stop": e["price"] * (1 - BREAK_PCT),
                 "upper": upper, "lower": lower, "width_ratio": w1 / w0, "direction": None, "entry": None}
@@ -257,20 +277,28 @@ def triangle_up_breakouts(
     bars: pd.DataFrame,
     min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE,
     edge_slack: float = TRIANGLE_EDGE_SLACK,
+    max_rail_deviation_pct: float | None = None,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
     默认上下沿各 2 个触点就够，与现行扫描一致。`min_touches_per_side=3` 时，
     突破之前上沿至少还要被一个峰、下沿至少还要被一个谷确认贴住，否则这次收盘突破不算这个形态。
     触点只计确认日早于突破检查的点，不看突破日之后的峰谷。
+    `max_rail_deviation_pct` 默认关闭。打开后，形成期内最高价高出上沿、最低价低于下沿
+    不得超过这个百分比，否则这组边界不成立。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
     if len(bars) < 30:
         return []
     close = bars["close"].to_numpy(dtype=float)
+    high = bars["high"].to_numpy(dtype=float)
+    low = bars["low"].to_numpy(dtype=float)
     events = []
-    for triangle in find_triangles(pattern_pivots(bars), close, edge_slack=edge_slack):
+    for triangle in find_triangles(
+        pattern_pivots(bars), close, edge_slack=edge_slack,
+        max_rail_deviation_pct=max_rail_deviation_pct, high=high, low=low,
+    ):
         entry = triangle.get("entry")
         if entry is None:
             continue
