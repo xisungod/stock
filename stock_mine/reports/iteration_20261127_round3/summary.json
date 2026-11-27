@@ -1,0 +1,341 @@
+{
+  "ratio": 0.75,
+  "missing_ratio": 0,
+  "kept_rule": false,
+  "logic_change_retained": false,
+  "rows": [
+    {
+      "signals": 3287,
+      "stocks": 526,
+      "signal_days": 922,
+      "t5": {
+        "n": 3287,
+        "mean_net": 0.152,
+        "median_net": -0.349,
+        "win_rate": 46.3,
+        "mean_excess": 0.168,
+        "beat_benchmark_rate": 45.1,
+        "excess_ci95": [
+          -0.057,
+          0.406
+        ],
+        "profit_factor": 1.071,
+        "payoff": 1.242,
+        "avg_win": 4.956,
+        "avg_loss": -3.992
+      },
+      "t10": {
+        "n": 3287,
+        "mean_net": 0.36,
+        "median_net": -0.604,
+        "win_rate": 46.6,
+        "mean_excess": 0.335,
+        "beat_benchmark_rate": 45.9,
+        "excess_ci95": [
+          -0.051,
+          0.715
+        ],
+        "profit_factor": 1.113,
+        "payoff": 1.273,
+        "avg_win": 7.621,
+        "avg_loss": -5.986
+      },
+      "t20": {
+        "n": 3287,
+        "mean_net": 1.466,
+        "median_net": -1.076,
+        "win_rate": 46.7,
+        "mean_excess": 0.899,
+        "beat_benchmark_rate": 44.1,
+        "excess_ci95": [
+          0.28,
+          1.523
+        ],
+        "profit_factor": 1.341,
+        "payoff": 1.53,
+        "avg_win": 12.36,
+        "avg_loss": -8.078
+      },
+      "label": "开发段",
+      "variant": "改前：当前默认（常态量 ≤ 1 倍）"
+    },
+    {
+      "signals": 1043,
+      "stocks": 419,
+      "signal_days": 547,
+      "t5": {
+        "n": 1043,
+        "mean_net": 0.342,
+        "median_net": -0.2,
+        "win_rate": 47.9,
+        "mean_excess": 0.42,
+        "beat_benchmark_rate": 47.9,
+        "excess_ci95": [
+          0.035,
+          0.822
+        ],
+        "profit_factor": 1.169,
+        "payoff": 1.27,
+        "avg_win": 4.926,
+        "avg_loss": -3.88
+      },
+      "t10": {
+        "n": 1043,
+        "mean_net": 0.571,
+        "median_net": -0.167,
+        "win_rate": 49.6,
+        "mean_excess": 0.591,
+        "beat_benchmark_rate": 48.9,
+        "excess_ci95": [
+          0.08,
+          1.123
+        ],
+        "profit_factor": 1.198,
+        "payoff": 1.219,
+        "avg_win": 6.975,
+        "avg_loss": -5.723
+      },
+      "t20": {
+        "n": 1043,
+        "mean_net": 1.957,
+        "median_net": -0.84,
+        "win_rate": 47.9,
+        "mean_excess": 1.374,
+        "beat_benchmark_rate": 47.2,
+        "excess_ci95": [
+          0.536,
+          2.32
+        ],
+        "profit_factor": 1.484,
+        "payoff": 1.612,
+        "avg_win": 12.513,
+        "avg_loss": -7.763
+      },
+      "label": "开发段",
+      "variant": "改后：常态量 ≤ 0.75 倍"
+    },
+    {
+      "signals": 2244,
+      "stocks": 503,
+      "signal_days": 831,
+      "t5": {
+        "n": 2244,
+        "mean_net": 0.063,
+        "median_net": -0.446,
+        "win_rate": 45.5,
+        "mean_excess": 0.051,
+        "beat_benchmark_rate": 43.7,
+        "excess_ci95": [
+          -0.212,
+          0.329
+        ],
+        "profit_factor": 1.029,
+        "payoff": 1.23,
+        "avg_win": 4.971,
+        "avg_loss": -4.041
+      },
+      "t10": {
+        "n": 2244,
+        "mean_net": 0.261,
+        "median_net": -0.798,
+        "win_rate": 45.3,
+        "mean_excess": 0.217,
+        "beat_benchmark_rate": 44.5,
+        "excess_ci95": [
+          -0.228,
+          0.647
+        ],
+        "profit_factor": 1.078,
+        "payoff": 1.303,
+        "avg_win": 7.949,
+        "avg_loss": -6.099
+      },
+      "t20": {
+        "n": 2244,
+        "mean_net": 1.238,
+        "median_net": -1.137,
+        "win_rate": 46.1,
+        "mean_excess": 0.677,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.067,
+          1.413
+        ],
+        "profit_factor": 1.28,
+        "payoff": 1.495,
+        "avg_win": 12.285,
+        "avg_loss": -8.219
+      },
+      "label": "开发段",
+      "variant": "被丢掉：常态量 > 0.75 或缺失"
+    },
+    {
+      "signals": 2047,
+      "stocks": 535,
+      "signal_days": 497,
+      "t5": {
+        "n": 2046,
+        "mean_net": 0.305,
+        "median_net": -0.2,
+        "win_rate": 47.8,
+        "mean_excess": 0.222,
+        "beat_benchmark_rate": 45.4,
+        "excess_ci95": [
+          -0.178,
+          0.563
+        ],
+        "profit_factor": 1.149,
+        "payoff": 1.258,
+        "avg_win": 4.911,
+        "avg_loss": -3.904
+      },
+      "t10": {
+        "n": 2046,
+        "mean_net": 0.555,
+        "median_net": -0.39,
+        "win_rate": 47.4,
+        "mean_excess": 0.205,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.351,
+          0.703
+        ],
+        "profit_factor": 1.187,
+        "payoff": 1.317,
+        "avg_win": 7.434,
+        "avg_loss": -5.647
+      },
+      "t20": {
+        "n": 2046,
+        "mean_net": 0.796,
+        "median_net": -0.337,
+        "win_rate": 48.7,
+        "mean_excess": 0.129,
+        "beat_benchmark_rate": 42.3,
+        "excess_ci95": [
+          -0.67,
+          0.82
+        ],
+        "profit_factor": 1.178,
+        "payoff": 1.242,
+        "avg_win": 10.828,
+        "avg_loss": -8.719
+      },
+      "label": "留出段",
+      "variant": "改前：当前默认（常态量 ≤ 1 倍）"
+    },
+    {
+      "signals": 613,
+      "stocks": 355,
+      "signal_days": 291,
+      "t5": {
+        "n": 613,
+        "mean_net": 0.18,
+        "median_net": -0.2,
+        "win_rate": 48.8,
+        "mean_excess": -0.209,
+        "beat_benchmark_rate": 43.6,
+        "excess_ci95": [
+          -0.871,
+          0.415
+        ],
+        "profit_factor": 1.091,
+        "payoff": 1.145,
+        "avg_win": 4.432,
+        "avg_loss": -3.869
+      },
+      "t10": {
+        "n": 613,
+        "mean_net": 0.079,
+        "median_net": -0.356,
+        "win_rate": 48.3,
+        "mean_excess": -0.693,
+        "beat_benchmark_rate": 40.3,
+        "excess_ci95": [
+          -1.625,
+          0.126
+        ],
+        "profit_factor": 1.026,
+        "payoff": 1.099,
+        "avg_win": 6.414,
+        "avg_loss": -5.835
+      },
+      "t20": {
+        "n": 613,
+        "mean_net": 0.495,
+        "median_net": -0.595,
+        "win_rate": 48.1,
+        "mean_excess": -0.456,
+        "beat_benchmark_rate": 39.6,
+        "excess_ci95": [
+          -1.937,
+          0.779
+        ],
+        "profit_factor": 1.108,
+        "payoff": 1.195,
+        "avg_win": 10.529,
+        "avg_loss": -8.813
+      },
+      "label": "留出段",
+      "variant": "改后：常态量 ≤ 0.75 倍"
+    },
+    {
+      "signals": 1434,
+      "stocks": 508,
+      "signal_days": 461,
+      "t5": {
+        "n": 1433,
+        "mean_net": 0.358,
+        "median_net": -0.332,
+        "win_rate": 47.3,
+        "mean_excess": 0.406,
+        "beat_benchmark_rate": 46.2,
+        "excess_ci95": [
+          -0.003,
+          0.784
+        ],
+        "profit_factor": 1.174,
+        "payoff": 1.307,
+        "avg_win": 5.122,
+        "avg_loss": -3.919
+      },
+      "t10": {
+        "n": 1433,
+        "mean_net": 0.758,
+        "median_net": -0.413,
+        "win_rate": 47.0,
+        "mean_excess": 0.59,
+        "beat_benchmark_rate": 43.5,
+        "excess_ci95": [
+          0.013,
+          1.179
+        ],
+        "profit_factor": 1.257,
+        "payoff": 1.416,
+        "avg_win": 7.882,
+        "avg_loss": -5.568
+      },
+      "t20": {
+        "n": 1433,
+        "mean_net": 0.925,
+        "median_net": -0.307,
+        "win_rate": 48.9,
+        "mean_excess": 0.379,
+        "beat_benchmark_rate": 43.5,
+        "excess_ci95": [
+          -0.453,
+          1.2
+        ],
+        "profit_factor": 1.209,
+        "payoff": 1.262,
+        "avg_win": 10.953,
+        "avg_loss": -8.678
+      },
+      "label": "留出段",
+      "variant": "被丢掉：常态量 > 0.75 或缺失"
+    }
+  ],
+  "as_of": "2026-11-26",
+  "dev_end": "2023-12-31",
+  "hold_end": "2026-10-21"
+}
