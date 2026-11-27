@@ -103,6 +103,8 @@ class StrategyConfig:
     max_post_breakout_runup_pct: float | None = None
     # 回踩最低价相对这段最高价至少回落该比例，轻微回落不算确认。None 表示不设下限。
     min_pullback_depth_pct: float | None = None
+    # 确认日收盘相对 MA 的上限。None 表示不限制已经涨离均线多远。
+    max_close_above_ma_pct: float | None = None
     # 买入预警要求突破前该根数之内有足够的独立验证（platform_events 为 confirmed_event_count，
     # legacy 为 min_line_strength）；更早的证据只保留展示。None 保留全历史计数的旧批次。
     max_event_age_bars: int | None = None
@@ -163,6 +165,7 @@ class StrategyConfig:
         for name in (
             "pullback_max_normal_volume_ratio", "max_post_breakout_runup_pct",
             "triangle_max_close_extension_pct", "min_pullback_depth_pct",
+            "max_close_above_ma_pct",
         ):
             value = getattr(self, name)
             if value is not None and (isinstance(value, bool) or not np.isfinite(value) or value <= 0):
@@ -1493,7 +1496,7 @@ def _pullback_check(
 
 PULLBACK_CONDITIONS = (
     "in_window", "touched", "recovered", "not_extended", "shrink_vs_breakout",
-    "held_line", "normal_volume_ok", "runup_ok", "depth_ok",
+    "held_line", "normal_volume_ok", "runup_ok", "depth_ok", "ma_extension_ok",
 )
 
 
@@ -1530,10 +1533,21 @@ def _pullback_conditions(df: pd.DataFrame, line_price: float, breakout: dict[str
         "depth_ok": cfg.min_pullback_depth_pct is None or (
             peak > 0 and (peak - low) / peak + 1e-12 >= cfg.min_pullback_depth_pct
         ),
+        "ma_extension_ok": _close_not_extended_above_ma(df, close, cfg),
         "volume_ratio": volume / breakout_volume if breakout_volume > 0 else None,
         "normal_volume_ratio": normal_ratio,
         "max_runup_pct": (peak / line_price - 1) * 100 if line_price > 0 else None,
     }
+
+
+def _close_not_extended_above_ma(df: pd.DataFrame, close: float, cfg: StrategyConfig) -> bool:
+    """确认日收盘不能高出均线超过上限。只用截至信号日的收盘，规则关闭时直接通过。"""
+    limit = cfg.max_close_above_ma_pct
+    if limit is None:
+        return True
+    periods = min(cfg.ma_period, max(5, cfg.ma_period // 2))
+    average = float(df["close"].rolling(cfg.ma_period, min_periods=periods).mean().iloc[-1])
+    return bool(np.isfinite(average) and average > 0 and close <= average * (1 + limit) + 1e-12)
 
 
 def _confirm_pullback(df: pd.DataFrame, line_price: float, breakout: dict[str, Any], cfg: StrategyConfig) -> dict[str, Any] | None:
