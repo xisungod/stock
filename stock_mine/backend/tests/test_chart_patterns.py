@@ -130,6 +130,17 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_ascending_flat_keeps_a_nearly_level_top_and_rejects_a_falling_one():
+    """上沿跌约 3.1% 时默认仍认定；3% 走平上限不认。上沿跌约 2.3% 且下沿抬高才留下。"""
+    close = np.full(55, 11.5)
+    close[48] = 12.6
+    falling = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(falling, close) != []
+    assert find_triangles(falling, close, ascending_flat_pct=0.03) == []
+    flat = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.7), ("V", 40, 10.9))
+    assert find_triangles(flat, close, ascending_flat_pct=0.03) != []
+
+
 def test_ten_bars_to_apex_rejects_a_triangle_about_to_close():
     """确认日离顶点只剩一两根时，默认仍可突破。要求至少还剩 10 根时，这组边界不成立。"""
     tight = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 11.9))

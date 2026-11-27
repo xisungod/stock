@@ -110,6 +110,7 @@ def find_triangles(
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
     max_slope_balance: float | None = None,
     min_bars_to_apex: int | None = None,
+    ascending_flat_pct: float | None = None,
 ) -> list[dict[str, Any]]:
     if min_span_bars < 0 or max_span_bars < min_span_bars:
         raise ValueError("整理跨度窗口不成立")
@@ -117,6 +118,8 @@ def find_triangles(
         raise ValueError("对称倍数不能小于 1")
     if min_bars_to_apex is not None and (isinstance(min_bars_to_apex, bool) or not isinstance(min_bars_to_apex, int) or min_bars_to_apex < 1):
         raise ValueError("到顶点的剩余根数必须是正整数")
+    if ascending_flat_pct is not None and (not np.isfinite(ascending_flat_pct) or ascending_flat_pct < 0 or ascending_flat_pct >= 1):
+        raise ValueError("上升三角的上沿走平幅度必须在 [0, 1)")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -141,6 +144,12 @@ def find_triangles(
             continue
         up_slope = (b["price"] - a["price"]) / (b["idx"] - a["idx"])
         lo_slope = (e["price"] - d["price"]) / (e["idx"] - d["idx"])
+        # 默认不分类。打开后只留上升三角：下沿抬高，上沿跌幅不超过给定百分比。
+        # 后峰仍不得高出前峰超过边界容差。不够的四点组合不成立，后面的峰谷可以另组。
+        if ascending_flat_pct is not None and not (
+            e["price"] > d["price"] and b["price"] + 1e-12 >= a["price"] * (1 - ascending_flat_pct)
+        ):
+            continue
         # 默认不区分对称、上升、下降。打开后，较陡一边的斜率绝对值不得超过较缓一边的该倍数。
         # 一边几乎走平就不算对称，这组边界不成立，后面的峰谷可以另组三角形。
         if max_slope_balance is not None:
@@ -304,6 +313,7 @@ def triangle_up_breakouts(
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
     max_slope_balance: float | None = None,
     min_bars_to_apex: int | None = None,
+    ascending_flat_pct: float | None = None,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
@@ -315,6 +325,7 @@ def triangle_up_breakouts(
     四个锚点的跨度默认不超过 100 根。`min_span_bars` / `max_span_bars` 用来改这个窗口。
     `max_slope_balance` 默认关闭。打开后只保留两边斜率绝对值相差不超过该倍数的对称三角。
     `min_bars_to_apex` 默认关闭。打开后，第四个锚点确认时，两轨相交至少还要这么多根。
+    `ascending_flat_pct` 默认关闭。打开后只留上升三角：下沿抬高，上沿跌幅不超过该比例。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
@@ -330,6 +341,7 @@ def triangle_up_breakouts(
         min_span_bars=min_span_bars, max_span_bars=max_span_bars,
         max_slope_balance=max_slope_balance,
         min_bars_to_apex=min_bars_to_apex,
+        ascending_flat_pct=ascending_flat_pct,
     ):
         entry = triangle.get("entry")
         if entry is None:
