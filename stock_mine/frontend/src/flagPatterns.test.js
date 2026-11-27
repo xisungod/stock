@@ -71,6 +71,17 @@ test('flag-only ignores the precision pullback gate and hidden invalid day range
   assert.equal(form.max_pullback_days, 'bad');
 });
 
+test('triangle scan does not inherit precision pullback or flag volume gates', () => {
+  const sent = scanPayload({ strategy_mode: 'triangle_breakout', require_pullback: true, require_breakout_volume: true,
+    flag_direction: 'ascending', min_days_since_breakout: 5, prebreakout_extension_percent: 20 });
+  assert.equal(sent.strategy_mode, 'triangle_breakout');
+  assert.equal(sent.require_pullback, false);
+  assert.equal(sent.require_breakout_volume, false);
+  assert.equal(sent.max_prebreakout_extension_pct, null);
+  assert.equal(sent.flag_direction, 'all');
+  assert.equal(sent.min_days_since_breakout, 0);
+});
+
 test('prebreakout defaults to 50 percent and preserves explicit old values and zero', () => {
   assert.equal(scanPayload({}).max_prebreakout_extension_pct, .5);
   assert.equal(scanPayload({ prebreakout_extension_percent: '50' }).max_prebreakout_extension_pct, .5);

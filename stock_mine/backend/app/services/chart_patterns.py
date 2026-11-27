@@ -219,3 +219,43 @@ def detect_chart_patterns(bars: pd.DataFrame, dates: list[str]) -> dict[str, Any
         })
     return {**empty, "w_bottoms": w_items, "triangles": t_items,
             "as_of": dates[len(bars) - 1] if dates else None}
+
+
+def triangle_up_breakouts(bars: pd.DataFrame) -> list[dict[str, Any]]:
+    """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
+
+    认定与 `find_triangles` 是同一份。调用方必须只传入截至信号日的已收盘 K 线；
+    这里不再向后看。向下突破和仍在收敛的形态不产生买入。
+    """
+    if len(bars) < 30:
+        return []
+    close = bars["close"].to_numpy(dtype=float)
+    events = []
+    for triangle in find_triangles(pattern_pivots(bars), close):
+        entry = triangle.get("entry")
+        if entry is None:
+            continue
+        upper = float(triangle["upper"](entry))
+        events.append({
+            "signal_index": int(entry),
+            "detected_index": int(triangle["detected"]),
+            "start_index": int(triangle["start"]),
+            "upper": upper,
+            "stop": float(triangle["stop"]),
+            "width_ratio": float(triangle["width_ratio"]),
+            "event_id": f"triangle:{int(triangle['start'])}:{int(entry)}",
+        })
+    return events
+
+
+def active_triangle(bars: pd.DataFrame) -> dict[str, Any] | None:
+    """最后一根仍落在尚未突破的三角形里时，返回该形态，供扫描标成观察而不是买入。"""
+    if len(bars) < 30:
+        return None
+    close = bars["close"].to_numpy(dtype=float)
+    last = len(close) - 1
+    found = None
+    for triangle in find_triangles(pattern_pivots(bars), close):
+        if triangle.get("outcome") == "active" and triangle["detected"] <= last <= triangle["end"]:
+            found = triangle
+    return found

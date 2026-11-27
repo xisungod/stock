@@ -9,6 +9,7 @@ import {
   Eye,
   Flag,
   LineChart,
+  Triangle,
   Loader2,
   Play,
   RefreshCw,
@@ -527,8 +528,10 @@ function Dashboard() {
           <button type="button" disabled={loading} className={form.strategy_mode === 'combined' ? 'active' : ''} aria-pressed={form.strategy_mode === 'combined'} onClick={() => setForm({ ...form, strategy_mode: 'combined' })}><Search size={15} />联合筛选</button>
           <button type="button" disabled={loading} className={form.strategy_mode === 'precision_pullback' ? 'active' : ''} aria-pressed={form.strategy_mode === 'precision_pullback'} onClick={() => setForm({ ...form, strategy_mode: 'precision_pullback' })}><LineChart size={15} />精准线回调</button>
           <button type="button" disabled={loading} className={form.strategy_mode === 'flag_breakout' ? 'active' : ''} aria-pressed={form.strategy_mode === 'flag_breakout'} onClick={() => setForm({ ...form, strategy_mode: 'flag_breakout' })}><Flag size={15} />旗形突破</button>
+          <button type="button" disabled={loading} className={form.strategy_mode === 'triangle_breakout' ? 'active' : ''} aria-pressed={form.strategy_mode === 'triangle_breakout'} onClick={() => setForm({ ...form, strategy_mode: 'triangle_breakout' })}><Triangle size={15} />三角整理</button>
         </div>
-        {form.strategy_mode !== 'precision_pullback' && <label>旗面方向
+        {form.strategy_mode === 'triangle_breakout' && <p className="field-hint">按收盘突破上沿确认。不套用精准线回踩，也不套用旗形通道。联合筛选仍不包含这一条。</p>}
+        {form.strategy_mode !== 'precision_pullback' && form.strategy_mode !== 'triangle_breakout' && <label>旗面方向
           <select disabled={loading} value={form.flag_direction} onChange={event => setForm({ ...form, flag_direction: event.target.value })}>
             <option value="all">全部方向</option>
             {Object.entries(flagDirectionLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}

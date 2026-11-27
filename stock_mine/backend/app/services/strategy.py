@@ -303,7 +303,9 @@ def build_strategy_config(params: dict[str, Any]) -> StrategyConfig:
     参数缺失表示该批次创建时规则尚不存在，一律按「未启用」解释，旧批次的结论不会被静默改写。
     新请求的默认值由 `app.schemas.ScanRequest` 给出。
     """
-    precision_enabled = params.get("strategy_mode") != "flag_breakout"
+    mode = params.get("strategy_mode", "precision_pullback")
+    # 旗形和三角整理都不套用精准线的回踩窗口。旧批次没有 strategy_mode 时仍是精准线。
+    precision_enabled = mode not in {"flag_breakout", "triangle_breakout"}
 
     def optional(name: str, cast):
         value = params.get(name)
@@ -322,9 +324,13 @@ def build_strategy_config(params: dict[str, Any]) -> StrategyConfig:
             if precision_enabled and params.get("max_pullback_days") is not None else None
         ),
         breakout_vol_mult=float(params.get("breakout_vol_mult") or 1.5),
-        # Older batches always required volume; do not silently change their signals.
-        require_breakout_volume=not precision_enabled or bool(params.get("require_breakout_volume", True)),
-        strategy_mode=params.get("strategy_mode", "precision_pullback"),
+        # Older precision batches always required volume. Flag keeps its own volume rule.
+        # Triangle confirmation is a close through the upper edge, not a volume gate.
+        require_breakout_volume=(
+            True if mode == "flag_breakout" else False if mode == "triangle_breakout"
+            else bool(params.get("require_breakout_volume", True))
+        ),
+        strategy_mode=mode,
         flag_direction=params.get("flag_direction", "all"),
         # An absent field in an old saved batch means the filter was not enabled.
         max_prebreakout_extension_pct=optional("max_prebreakout_extension_pct", float),
@@ -403,6 +409,8 @@ def _run_pipeline(
         return _run_combined_pipeline(stock_code, stock_name, df_upto, cfg)
     if cfg.strategy_mode == "flag_breakout":
         outcome = _run_flag_pipeline(stock_code, stock_name, df_upto, cfg)
+    elif cfg.strategy_mode == "triangle_breakout":
+        outcome = _run_triangle_pipeline(stock_code, stock_name, df_upto, cfg)
     elif cfg.strategy_mode == "precision_pullback":
         outcome = _run_precision_pipeline(stock_code, stock_name, df_upto, cfg)
     else:
@@ -508,6 +516,74 @@ def _merge_pattern_results(stock_code, stock_name, df, cfg, precision, flag):
                 markers[(marker["date"], marker["type"])] = marker
         merged.chart["markers"] = list(markers.values())
     return "ok", merged.suggestion, merged
+
+
+def _triangle_buy_result(stock_code: str, stock_name: str, df: pd.DataFrame, event: dict[str, Any], cfg: StrategyConfig) -> SignalResult:
+    index = int(event["signal_index"])
+    close = float(df["close"].iloc[index])
+    upper = float(event["upper"])
+    distance = (close / upper - 1) * 100 if upper else 0.0
+    stamp = _date_str(df["trade_date"].iloc[index])
+    detected = _date_str(df["trade_date"].iloc[int(event["detected_index"])])
+    score = 55.0 + min(15.0, max(0.0, 0.6 - float(event["width_ratio"])) * 25)
+    return SignalResult(
+        stock_code, stock_name, SignalCategory.BUY_ALERT, score,
+        "买入预警：三角形整理向上突破，收盘越过上沿",
+        round(upper, 3), 4, stamp,
+        line_formation_date=detected, breakout_date=stamp, current_price=round(close, 3),
+        distance_to_line_pct=round(distance, 3), structure_score=score,
+        pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+        signal_event_id=f"{stock_code}:{event['event_id']}",
+        require_breakout_volume=False,
+        reasons=[
+            "两峰两谷确立上下沿，共同区间收敛到起点宽度的 60% 以内",
+            f"识别日 {detected}，确认日 {stamp} 收盘高于上沿 0.5%",
+        ],
+        risks=["结构突破提醒。是否优于同日基准，以同一规则的分段验证为准。"],
+        breakout_status={"tags": ["向上突破"], "width_ratio": round(float(event["width_ratio"]), 3), "stop": round(float(event["stop"]), 3)},
+    )
+
+
+def iter_triangle_buy_results(stock_code: str, stock_name: str, df: pd.DataFrame, cfg: StrategyConfig, start_idx: int = 0):
+    """整段只跑一次认定。每个向上突破只在其确认日产出买入预警。"""
+    from app.services.chart_patterns import triangle_up_breakouts
+
+    for event in triangle_up_breakouts(df):
+        if event["signal_index"] >= start_idx:
+            yield event["signal_index"], _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+
+
+def _run_triangle_pipeline(
+    stock_code: str, stock_name: str, df: pd.DataFrame, cfg: StrategyConfig,
+) -> tuple[str, str, SignalResult | None]:
+    """扫描日只看这一根及以前。确认日是向上突破的收盘，收敛中只作为观察。"""
+    from app.services.chart_patterns import active_triangle, triangle_up_breakouts
+
+    last = len(df) - 1
+    event = next((item for item in triangle_up_breakouts(df) if item["signal_index"] == last), None)
+    if event is not None:
+        result = _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+        return "ok", result.suggestion, result
+    active = active_triangle(df)
+    if active is None:
+        return "no_triangle", "截至信号日没有已确认的三角形向上突破", None
+    upper = float(active["upper"](last))
+    close = float(df["close"].iloc[last])
+    stamp = _date_str(df["trade_date"].iloc[last])
+    result = SignalResult(
+        stock_code, stock_name, SignalCategory.WATCH, 40.0,
+        "观察机会：三角形整理仍在收敛，等待收盘突破上沿",
+        round(upper, 3), len(active["pivots"]), stamp,
+        line_formation_date=_date_str(df["trade_date"].iloc[int(active["detected"])]),
+        current_price=round(close, 3),
+        distance_to_line_pct=round((close / upper - 1) * 100, 3) if upper else None,
+        structure_score=40.0, pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+        require_breakout_volume=False,
+        reasons=["上下沿已确立且仍在收敛，收盘尚未越过上沿 0.5%"],
+        risks=["收敛中不是买入预警。"],
+        breakout_status={"tags": ["收敛中"], "width_ratio": round(float(active["width_ratio"]), 3)},
+    )
+    return "ok", result.suggestion, result
 
 
 def _run_flag_pipeline(
