@@ -130,6 +130,19 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_ten_bars_to_apex_rejects_a_triangle_about_to_close():
+    """确认日离顶点只剩一两根时，默认仍可突破。要求至少还剩 10 根时，这组边界不成立。"""
+    tight = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 11.9))
+    tight_close = np.full(50, 12.05)
+    tight_close[43] = 12.4
+    assert find_triangles(tight, tight_close) != []
+    assert find_triangles(tight, tight_close, min_bars_to_apex=10) == []
+    roomy = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    roomy_close = np.full(55, 11.5)
+    roomy_close[48] = 12.2
+    assert find_triangles(roomy, roomy_close, min_bars_to_apex=10) != []
+
+
 def test_symmetric_balance_rejects_a_nearly_flat_lower_rail():
     """下沿几乎走平时，默认仍认定。较陡一边不得超过较缓一边的 2 倍时，这组边界不成立。"""
     tilted = triangle_pivots(("P", 0, 16.0), ("V", 10, 10.0), ("P", 30, 13.5), ("V", 55, 10.8))

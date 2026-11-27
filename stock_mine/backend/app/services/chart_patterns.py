@@ -109,11 +109,14 @@ def find_triangles(
     min_span_bars: int = 0,
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
     max_slope_balance: float | None = None,
+    min_bars_to_apex: int | None = None,
 ) -> list[dict[str, Any]]:
     if min_span_bars < 0 or max_span_bars < min_span_bars:
         raise ValueError("整理跨度窗口不成立")
     if max_slope_balance is not None and (not np.isfinite(max_slope_balance) or max_slope_balance < 1):
         raise ValueError("对称倍数不能小于 1")
+    if min_bars_to_apex is not None and (isinstance(min_bars_to_apex, bool) or not isinstance(min_bars_to_apex, int) or min_bars_to_apex < 1):
+        raise ValueError("到顶点的剩余根数必须是正整数")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -156,6 +159,9 @@ def find_triangles(
             continue
         apex = x1 + w1 / (lo_slope - up_slope)
         if t0 >= apex:
+            continue
+        # 默认只要确认日还没到顶点。打开后，两轨相交至少还要这么多根，马上收口的不算。
+        if min_bars_to_apex is not None and apex - t0 < min_bars_to_apex:
             continue
         forming_days = np.arange(shared_start, t0 + 1)
         forming_closes = close[shared_start:t0 + 1]
@@ -297,6 +303,7 @@ def triangle_up_breakouts(
     min_span_bars: int = 0,
     max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
     max_slope_balance: float | None = None,
+    min_bars_to_apex: int | None = None,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
@@ -307,6 +314,7 @@ def triangle_up_breakouts(
     不得超过这个百分比，否则这组边界不成立。
     四个锚点的跨度默认不超过 100 根。`min_span_bars` / `max_span_bars` 用来改这个窗口。
     `max_slope_balance` 默认关闭。打开后只保留两边斜率绝对值相差不超过该倍数的对称三角。
+    `min_bars_to_apex` 默认关闭。打开后，第四个锚点确认时，两轨相交至少还要这么多根。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
@@ -321,6 +329,7 @@ def triangle_up_breakouts(
         max_rail_deviation_pct=max_rail_deviation_pct, high=high, low=low,
         min_span_bars=min_span_bars, max_span_bars=max_span_bars,
         max_slope_balance=max_slope_balance,
+        min_bars_to_apex=min_bars_to_apex,
     ):
         entry = triangle.get("entry")
         if entry is None:
