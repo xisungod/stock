@@ -130,6 +130,19 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_height_band_rejects_a_flat_channel_and_keeps_a_normal_one():
+    """确认时上下沿只有约 2% 太扁。大约 10% 的高度留在 4%～15% 里。"""
+    flat_close = np.full(60, 11.5)
+    flat_close[48] = 12.8
+    flat = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.4), ("V", 40, 11.4))
+    assert find_triangles(flat, flat_close) != []
+    assert find_triangles(flat, flat_close, min_height_pct=0.04, max_height_pct=0.15) == []
+    normal_close = np.full(55, 11.5)
+    normal_close[48] = 12.6
+    normal = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(normal, normal_close, min_height_pct=0.04, max_height_pct=0.15) != []
+
+
 def test_descending_flat_keeps_a_level_base_and_rejects_a_rising_one():
     """下沿抬高约 9% 时默认仍认定；下降三角要求下沿涨幅不超过 3%，且上沿下降。"""
     close = np.full(55, 11.5)

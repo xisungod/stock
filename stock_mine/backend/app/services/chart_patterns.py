@@ -112,6 +112,8 @@ def find_triangles(
     min_bars_to_apex: int | None = None,
     ascending_flat_pct: float | None = None,
     descending_flat_pct: float | None = None,
+    min_height_pct: float | None = None,
+    max_height_pct: float | None = None,
 ) -> list[dict[str, Any]]:
     if min_span_bars < 0 or max_span_bars < min_span_bars:
         raise ValueError("整理跨度窗口不成立")
@@ -123,6 +125,11 @@ def find_triangles(
         raise ValueError("上升三角的上沿走平幅度必须在 [0, 1)")
     if descending_flat_pct is not None and (not np.isfinite(descending_flat_pct) or descending_flat_pct < 0 or descending_flat_pct >= 1):
         raise ValueError("下降三角的下沿走平幅度必须在 [0, 1)")
+    for name, value in (("min_height_pct", min_height_pct), ("max_height_pct", max_height_pct)):
+        if value is not None and (not np.isfinite(value) or value < 0 or value >= 1):
+            raise ValueError("形态高度必须在 [0, 1)")
+    if min_height_pct is not None and max_height_pct is not None and min_height_pct > max_height_pct:
+        raise ValueError("形态高度下限不能大于上限")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -181,6 +188,15 @@ def find_triangles(
         # 默认只要确认日还没到顶点。打开后，两轨相交至少还要这么多根，马上收口的不算。
         if min_bars_to_apex is not None and apex - t0 < min_bars_to_apex:
             continue
+        # 打开后，第四个锚点确认时上下沿高度占收盘的比例必须落在给定区间。太扁或太高都不成立。
+        if min_height_pct is not None or max_height_pct is not None:
+            spot = float(close[t0])
+            gap = float(upper(t0) - lower(t0))
+            height = gap / spot if spot > 0 else -1.0
+            if not np.isfinite(height) or (min_height_pct is not None and height < min_height_pct) or (
+                max_height_pct is not None and height > max_height_pct
+            ):
+                continue
         forming_days = np.arange(shared_start, t0 + 1)
         forming_closes = close[shared_start:t0 + 1]
         if (np.any(forming_closes > upper(forming_days) * (1 + TRIANGLE_BREAK_PCT))
@@ -324,6 +340,8 @@ def triangle_up_breakouts(
     min_bars_to_apex: int | None = None,
     ascending_flat_pct: float | None = None,
     descending_flat_pct: float | None = None,
+    min_height_pct: float | None = None,
+    max_height_pct: float | None = None,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
@@ -337,6 +355,7 @@ def triangle_up_breakouts(
     `min_bars_to_apex` 默认关闭。打开后，第四个锚点确认时，两轨相交至少还要这么多根。
     `ascending_flat_pct` 默认关闭。打开后只留上升三角：下沿抬高，上沿跌幅不超过该比例。
     `descending_flat_pct` 默认关闭。打开后只留下降三角：上沿下降，下沿涨幅不超过该比例。
+    `min_height_pct` / `max_height_pct` 默认关闭。打开后，第四个锚点确认时上下沿高度占收盘的比例必须落在这个区间。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
@@ -354,6 +373,8 @@ def triangle_up_breakouts(
         min_bars_to_apex=min_bars_to_apex,
         ascending_flat_pct=ascending_flat_pct,
         descending_flat_pct=descending_flat_pct,
+        min_height_pct=min_height_pct,
+        max_height_pct=max_height_pct,
     ):
         entry = triangle.get("entry")
         if entry is None:
