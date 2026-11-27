@@ -26,6 +26,8 @@ TRIANGLE_MIN_SHARED_BARS = 15
 TRIANGLE_MAX_FIRST_SWING_RATIO = 1.5
 # 扫描默认仍是两峰两谷。3 表示上下沿在突破前都必须再被确认触到一次，本轮只作对照，不改默认。
 TRIANGLE_MIN_TOUCHES_PER_SIDE = 2
+# 后峰可以比前峰高 1%，后谷可以比前谷低 1%。0 表示上沿不许上升、下沿不许下降。默认仍是 1%。
+TRIANGLE_EDGE_SLACK = 0.01
 WAIT_BARS = 40
 MAX_DRAWN = 200  # 只为防止异常数据撑大接口；正常全历史也到不了这么多
 PATTERN_NOTE = "只用已确认峰谷和已收盘 K 线识别，形态仅作结构参考。"
@@ -95,7 +97,7 @@ def find_w_bottoms(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
     return out
 
 
-def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[str, Any]]:
+def find_triangles(piv: list[dict[str, Any]], close: np.ndarray, edge_slack: float = TRIANGLE_EDGE_SLACK) -> list[dict[str, Any]]:
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -114,7 +116,9 @@ def find_triangles(piv: list[dict[str, Any]], close: np.ndarray) -> list[dict[st
         shared_span = x1 - shared_start
         if shared_span < TRIANGLE_MIN_SHARED_BARS or 2 * shared_span < x1 - x0:
             continue
-        if not (b["price"] <= a["price"] * 1.01 and e["price"] >= d["price"] * 0.99):
+        if edge_slack < 0:
+            raise ValueError("边界容差不能为负")
+        if not (b["price"] <= a["price"] * (1 + edge_slack) and e["price"] >= d["price"] * (1 - edge_slack)):
             continue
         up_slope = (b["price"] - a["price"]) / (b["idx"] - a["idx"])
         lo_slope = (e["price"] - d["price"]) / (e["idx"] - d["idx"])
@@ -249,7 +253,11 @@ def _rail_touches(pivots: list[dict[str, Any]]) -> tuple[int, int]:
     return peaks, valleys
 
 
-def triangle_up_breakouts(bars: pd.DataFrame, min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE) -> list[dict[str, Any]]:
+def triangle_up_breakouts(
+    bars: pd.DataFrame,
+    min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE,
+    edge_slack: float = TRIANGLE_EDGE_SLACK,
+) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
     默认上下沿各 2 个触点就够，与现行扫描一致。`min_touches_per_side=3` 时，
@@ -262,7 +270,7 @@ def triangle_up_breakouts(bars: pd.DataFrame, min_touches_per_side: int = TRIANG
         return []
     close = bars["close"].to_numpy(dtype=float)
     events = []
-    for triangle in find_triangles(pattern_pivots(bars), close):
+    for triangle in find_triangles(pattern_pivots(bars), close, edge_slack=edge_slack):
         entry = triangle.get("entry")
         if entry is None:
             continue

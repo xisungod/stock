@@ -91,6 +91,14 @@ def triangle_pivots(*touches):
             for kind, index, price in touches]
 
 
+def test_zero_edge_slack_rejects_a_slightly_rising_upper_rail():
+    rising = triangle_pivots(("P", 0, 13.0), ("V", 8, 10.0), ("P", 30, 13.05), ("V", 50, 11.6))
+    close = np.full(70, 11.8)
+    close[56] = 14.0
+    assert find_triangles(rising, close) != []
+    assert find_triangles(rising, close, edge_slack=0.0) == []
+
+
 def test_triangle_rejects_a_support_anchor_from_the_prior_rally():
     pivots = triangle_pivots(("V", 0, 10.0), ("P", 40, 20.0), ("V", 45, 16.0), ("P", 50, 20.0))
     close = np.linspace(10.0, 20.0, 56)
