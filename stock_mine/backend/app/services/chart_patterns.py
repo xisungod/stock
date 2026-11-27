@@ -28,6 +28,8 @@ TRIANGLE_MAX_FIRST_SWING_RATIO = 1.5
 TRIANGLE_MIN_TOUCHES_PER_SIDE = 2
 # 后峰可以比前峰高 1%，后谷可以比前谷低 1%。0 表示上沿不许上升、下沿不许下降。默认仍是 1%。
 TRIANGLE_EDGE_SLACK = 0.01
+# 四个锚点从第一点到第四点的跨度上限。默认 100 根；更短的窗口只作对照。
+TRIANGLE_MAX_SPAN_BARS = 100
 WAIT_BARS = 40
 MAX_DRAWN = 200  # 只为防止异常数据撑大接口；正常全历史也到不了这么多
 PATTERN_NOTE = "只用已确认峰谷和已收盘 K 线识别，形态仅作结构参考。"
@@ -104,7 +106,11 @@ def find_triangles(
     max_rail_deviation_pct: float | None = None,
     high: np.ndarray | None = None,
     low: np.ndarray | None = None,
+    min_span_bars: int = 0,
+    max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
 ) -> list[dict[str, Any]]:
+    if min_span_bars < 0 or max_span_bars < min_span_bars:
+        raise ValueError("整理跨度窗口不成立")
     n, out = len(close), []
     for j in range(3, len(piv)):
         four = piv[j - 3:j + 1]
@@ -115,7 +121,7 @@ def find_triangles(
             previous = out[-1]
             if t0 < previous["end"] or previous["outcome"] != "changed":
                 continue
-        if x1 - x0 > 100:
+        if x1 - x0 < min_span_bars or x1 - x0 > max_span_bars:
             continue
         a, b = [p for p in four if p["kind"] == "P"]
         d, e = [p for p in four if p["kind"] == "V"]
@@ -278,6 +284,8 @@ def triangle_up_breakouts(
     min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE,
     edge_slack: float = TRIANGLE_EDGE_SLACK,
     max_rail_deviation_pct: float | None = None,
+    min_span_bars: int = 0,
+    max_span_bars: int = TRIANGLE_MAX_SPAN_BARS,
 ) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
@@ -286,6 +294,7 @@ def triangle_up_breakouts(
     触点只计确认日早于突破检查的点，不看突破日之后的峰谷。
     `max_rail_deviation_pct` 默认关闭。打开后，形成期内最高价高出上沿、最低价低于下沿
     不得超过这个百分比，否则这组边界不成立。
+    四个锚点的跨度默认不超过 100 根。`min_span_bars` / `max_span_bars` 用来改这个窗口。
     """
     if min_touches_per_side < 2:
         raise ValueError("每边触点至少为 2")
@@ -298,6 +307,7 @@ def triangle_up_breakouts(
     for triangle in find_triangles(
         pattern_pivots(bars), close, edge_slack=edge_slack,
         max_rail_deviation_pct=max_rail_deviation_pct, high=high, low=low,
+        min_span_bars=min_span_bars, max_span_bars=max_span_bars,
     ):
         entry = triangle.get("entry")
         if entry is None:

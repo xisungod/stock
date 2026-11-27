@@ -130,6 +130,19 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_span_window_rejects_a_consolidation_longer_than_sixty_bars():
+    """四个锚点跨度 80 根时，默认仍认定；收到 20～60 根后这组边界不成立。"""
+    pivots = triangle_pivots(("P", 0, 13.0), ("V", 20, 10.0), ("P", 50, 12.5), ("V", 80, 11.2))
+    close = np.full(100, 11.5)
+    close[85] = 12.5
+    assert find_triangles(pivots, close) != []
+    assert find_triangles(pivots, close, min_span_bars=20, max_span_bars=60) == []
+    short = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    short_close = np.full(55, 11.5)
+    short_close[48] = 12.2
+    assert find_triangles(short, short_close, min_span_bars=20, max_span_bars=60) != []
+
+
 def test_rail_deviation_rejects_a_high_above_the_upper_rail():
     """收盘留在轨道内时，默认仍认定。最高价高出上沿超过 0.5% 时，这组边界不成立。"""
     pivots = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))

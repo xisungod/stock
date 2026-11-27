@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-11-27T17:42:30",
+  "meets_validity_standard": false,
+  "retained_as_default": false,
+  "min_span_bars": 20,
+  "max_span_bars": 60,
+  "shift": {
+    "same_event": 1079,
+    "new_event": 11,
+    "dropped_event": 172
+  },
+  "failures": [
+    {
+      "code": "000522",
+      "error": "history too short"
+    },
+    {
+      "code": "000542",
+      "error": "history too short"
+    },
+    {
+      "code": "001365",
+      "error": "history too short"
+    },
+    {
+      "code": "301707",
+      "error": "history too short"
+    },
+    {
+      "code": "301688",
+      "error": "history too short"
+    },
+    {
+      "code": "600001",
+      "error": "history too short"
+    },
+    {
+      "code": "600786",
+      "error": "history too short"
+    },
+    {
+      "code": "600840",
+      "error": "history too short"
+    },
+    {
+      "code": "600849",
+      "error": "AttributeError: Can only use .dt accessor with datetimelike values"
+    },
+    {
+      "code": "603293",
+      "error": "history too short"
+    },
+    {
+      "code": "603435",
+      "error": "history too short"
+    },
+    {
+      "code": "603468",
+      "error": "history too short"
+    },
+    {
+      "code": "688825",
+      "error": "history too short"
+    },
+    {
+      "code": "688828",
+      "error": "history too short"
+    },
+    {
+      "code": "688835",
+      "error": "history too short"
+    }
+  ],
+  "rows": [
+    {
+      "signals": 766,
+      "stocks": 420,
+      "t5": {
+        "n": 764,
+        "mean_net": -0.546,
+        "median_net": -0.8,
+        "win_rate": 42.5,
+        "mean_excess": -0.383,
+        "beat_benchmark_rate": 41.2,
+        "excess_ci95": [
+          -0.659,
+          -0.123
+        ]
+      },
+      "t10": {
+        "n": 764,
+        "mean_net": -0.333,
+        "median_net": -0.913,
+        "win_rate": 44.4,
+        "mean_excess": -0.294,
+        "beat_benchmark_rate": 42.4,
+        "excess_ci95": [
+          -0.866,
+          0.321
+        ]
+      },
+      "t20": {
+        "n": 764,
+        "mean_net": 0.185,
+        "median_net": -1.711,
+        "win_rate": 44.9,
+        "mean_excess": -0.166,
+        "beat_benchmark_rate": 41.1,
+        "excess_ci95": [
+          -1.105,
+          0.763
+        ]
+      },
+      "label": "开发段",
+      "variant": "改前：四点跨度不超过 100 根",
+      "arm": "before"
+    },
+    {
+      "signals": 485,
+      "stocks": 338,
+      "t5": {
+        "n": 483,
+        "mean_net": -0.313,
+        "median_net": -0.429,
+        "win_rate": 45.5,
+        "mean_excess": -0.395,
+        "beat_benchmark_rate": 42.7,
+        "excess_ci95": [
+          -1.095,
+          0.224
+        ]
+      },
+      "t10": {
+        "n": 483,
+        "mean_net": -0.705,
+        "median_net": -1.194,
+        "win_rate": 43.7,
+        "mean_excess": -0.58,
+        "beat_benchmark_rate": 41.4,
+        "excess_ci95": [
+          -1.48,
+          0.218
+        ]
+      },
+      "t20": {
+        "n": 483,
+        "mean_net": -0.239,
+        "median_net": -2.364,
+        "win_rate": 40.4,
+        "mean_excess": -0.712,
+        "beat_benchmark_rate": 37.9,
+        "excess_ci95": [
+          -2.031,
+          0.408
+        ]
+      },
+      "label": "留出段",
+      "variant": "改前：四点跨度不超过 100 根",
+      "arm": "before"
+    },
+    {
+      "signals": 669,
+      "stocks": 395,
+      "t5": {
+        "n": 667,
+        "mean_net": -0.767,
+        "median_net": -0.905,
+        "win_rate": 41.1,
+        "mean_excess": -0.564,
+        "beat_benchmark_rate": 39.3,
+        "excess_ci95": [
+          -0.856,
+          -0.292
+        ]
+      },
+      "t10": {
+        "n": 667,
+        "mean_net": -0.534,
+        "median_net": -1.087,
+        "win_rate": 42.6,
+        "mean_excess": -0.438,
+        "beat_benchmark_rate": 40.8,
+        "excess_ci95": [
+          -1.014,
+          0.187
+        ]
+      },
+      "t20": {
+        "n": 667,
+        "mean_net": -0.208,
+        "median_net": -2.446,
+        "win_rate": 43.3,
+        "mean_excess": -0.528,
+        "beat_benchmark_rate": 39.9,
+        "excess_ci95": [
+          -1.554,
+          0.477
+        ]
+      },
+      "label": "开发段",
+      "variant": "改后：四点跨度必须在 20～60 根",
+      "arm": "after"
+    },
+    {
+      "signals": 421,
+      "stocks": 307,
+      "t5": {
+        "n": 419,
+        "mean_net": -0.207,
+        "median_net": -0.411,
+        "win_rate": 45.8,
+        "mean_excess": -0.27,
+        "beat_benchmark_rate": 43.2,
+        "excess_ci95": [
+          -1.023,
+          0.392
+        ]
+      },
+      "t10": {
+        "n": 419,
+        "mean_net": -0.694,
+        "median_net": -1.307,
+        "win_rate": 43.2,
+        "mean_excess": -0.527,
+        "beat_benchmark_rate": 42.0,
+        "excess_ci95": [
+          -1.496,
+          0.356
+        ]
+      },
+      "t20": {
+        "n": 419,
+        "mean_net": -0.357,
+        "median_net": -2.465,
+        "win_rate": 40.6,
+        "mean_excess": -0.548,
+        "beat_benchmark_rate": 37.9,
+        "excess_ci95": [
+          -2.014,
+          0.788
+        ]
+      },
+      "label": "留出段",
+      "variant": "改后：四点跨度必须在 20～60 根",
+      "arm": "after"
+    }
+  ],
+  "elapsed_min": 0.3
+}
