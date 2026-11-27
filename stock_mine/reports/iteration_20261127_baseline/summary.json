@@ -1,0 +1,1483 @@
+{
+  "meta": {
+    "as_of": "2026-11-26",
+    "sampled": 600,
+    "succeeded": 585,
+    "dev_end": "2023-12-31",
+    "hold_end": "2026-10-21",
+    "purge_sessions": 25,
+    "pattern_report_uses_short_prose": true,
+    "code_has_shared_span_rule": true,
+    "logic_change_retained": false
+  },
+  "precision_default": [
+    {
+      "signals": 3287,
+      "stocks": 526,
+      "signal_days": 922,
+      "t5": {
+        "n": 3287,
+        "mean_net": 0.152,
+        "median_net": -0.349,
+        "win_rate": 46.3,
+        "mean_excess": 0.168,
+        "beat_benchmark_rate": 45.1,
+        "excess_ci95": [
+          -0.057,
+          0.406
+        ],
+        "profit_factor": 1.071,
+        "payoff": 1.242,
+        "avg_win": 4.956,
+        "avg_loss": -3.992
+      },
+      "t10": {
+        "n": 3287,
+        "mean_net": 0.36,
+        "median_net": -0.604,
+        "win_rate": 46.6,
+        "mean_excess": 0.335,
+        "beat_benchmark_rate": 45.9,
+        "excess_ci95": [
+          -0.051,
+          0.715
+        ],
+        "profit_factor": 1.113,
+        "payoff": 1.273,
+        "avg_win": 7.621,
+        "avg_loss": -5.986
+      },
+      "t20": {
+        "n": 3287,
+        "mean_net": 1.466,
+        "median_net": -1.076,
+        "win_rate": 46.7,
+        "mean_excess": 0.899,
+        "beat_benchmark_rate": 44.1,
+        "excess_ci95": [
+          0.28,
+          1.523
+        ],
+        "profit_factor": 1.341,
+        "payoff": 1.53,
+        "avg_win": 12.36,
+        "avg_loss": -8.078
+      },
+      "arm": "修复后规则（当前默认，大盘只标注）",
+      "key": "new",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 2047,
+      "stocks": 535,
+      "signal_days": 497,
+      "t5": {
+        "n": 2046,
+        "mean_net": 0.305,
+        "median_net": -0.2,
+        "win_rate": 47.8,
+        "mean_excess": 0.222,
+        "beat_benchmark_rate": 45.4,
+        "excess_ci95": [
+          -0.178,
+          0.563
+        ],
+        "profit_factor": 1.149,
+        "payoff": 1.258,
+        "avg_win": 4.911,
+        "avg_loss": -3.904
+      },
+      "t10": {
+        "n": 2046,
+        "mean_net": 0.555,
+        "median_net": -0.39,
+        "win_rate": 47.4,
+        "mean_excess": 0.205,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.351,
+          0.703
+        ],
+        "profit_factor": 1.187,
+        "payoff": 1.317,
+        "avg_win": 7.434,
+        "avg_loss": -5.647
+      },
+      "t20": {
+        "n": 2046,
+        "mean_net": 0.796,
+        "median_net": -0.337,
+        "win_rate": 48.7,
+        "mean_excess": 0.129,
+        "beat_benchmark_rate": 42.3,
+        "excess_ci95": [
+          -0.67,
+          0.82
+        ],
+        "profit_factor": 1.178,
+        "payoff": 1.242,
+        "avg_win": 10.828,
+        "avg_loss": -8.719
+      },
+      "arm": "修复后规则（当前默认，大盘只标注）",
+      "key": "new",
+      "label": "留出段",
+      "pass_t5": false
+    }
+  ],
+  "precision_arms": [
+    {
+      "signals": 9448,
+      "stocks": 550,
+      "signal_days": 1161,
+      "t5": {
+        "n": 9442,
+        "mean_net": 0.321,
+        "median_net": -0.465,
+        "win_rate": 46.3,
+        "mean_excess": 0.121,
+        "beat_benchmark_rate": 43.4,
+        "excess_ci95": [
+          -0.071,
+          0.3
+        ],
+        "profit_factor": 1.129,
+        "payoff": 1.308,
+        "avg_win": 6.063,
+        "avg_loss": -4.635
+      },
+      "t10": {
+        "n": 9442,
+        "mean_net": 0.652,
+        "median_net": -0.646,
+        "win_rate": 46.6,
+        "mean_excess": 0.214,
+        "beat_benchmark_rate": 43.2,
+        "excess_ci95": [
+          -0.072,
+          0.478
+        ],
+        "profit_factor": 1.184,
+        "payoff": 1.356,
+        "avg_win": 9.006,
+        "avg_loss": -6.641
+      },
+      "t20": {
+        "n": 9441,
+        "mean_net": 1.354,
+        "median_net": -1.143,
+        "win_rate": 46.3,
+        "mean_excess": 0.408,
+        "beat_benchmark_rate": 41.9,
+        "excess_ci95": [
+          -0.047,
+          0.863
+        ],
+        "profit_factor": 1.277,
+        "payoff": 1.481,
+        "avg_win": 13.501,
+        "avg_loss": -9.118
+      },
+      "arm": "修复前规则",
+      "key": "old",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 6363,
+      "stocks": 578,
+      "signal_days": 649,
+      "t5": {
+        "n": 6358,
+        "mean_net": 0.161,
+        "median_net": -0.601,
+        "win_rate": 45.3,
+        "mean_excess": -0.015,
+        "beat_benchmark_rate": 42.2,
+        "excess_ci95": [
+          -0.237,
+          0.178
+        ],
+        "profit_factor": 1.065,
+        "payoff": 1.288,
+        "avg_win": 5.801,
+        "avg_loss": -4.503
+      },
+      "t10": {
+        "n": 6358,
+        "mean_net": 0.641,
+        "median_net": -0.596,
+        "win_rate": 46.7,
+        "mean_excess": -0.031,
+        "beat_benchmark_rate": 40.2,
+        "excess_ci95": [
+          -0.421,
+          0.337
+        ],
+        "profit_factor": 1.185,
+        "payoff": 1.351,
+        "avg_win": 8.802,
+        "avg_loss": -6.514
+      },
+      "t20": {
+        "n": 6358,
+        "mean_net": 1.397,
+        "median_net": -0.366,
+        "win_rate": 48.6,
+        "mean_excess": -0.277,
+        "beat_benchmark_rate": 39.0,
+        "excess_ci95": [
+          -0.873,
+          0.236
+        ],
+        "profit_factor": 1.288,
+        "payoff": 1.365,
+        "avg_win": 12.858,
+        "avg_loss": -9.419
+      },
+      "arm": "修复前规则",
+      "key": "old",
+      "label": "留出段",
+      "pass_t5": false
+    },
+    {
+      "signals": 5060,
+      "stocks": 533,
+      "signal_days": 1043,
+      "t5": {
+        "n": 5058,
+        "mean_net": 0.196,
+        "median_net": -0.442,
+        "win_rate": 45.9,
+        "mean_excess": 0.15,
+        "beat_benchmark_rate": 44.7,
+        "excess_ci95": [
+          -0.061,
+          0.35
+        ],
+        "profit_factor": 1.082,
+        "payoff": 1.274,
+        "avg_win": 5.635,
+        "avg_loss": -4.424
+      },
+      "t10": {
+        "n": 5058,
+        "mean_net": 0.449,
+        "median_net": -0.674,
+        "win_rate": 46.4,
+        "mean_excess": 0.347,
+        "beat_benchmark_rate": 45.2,
+        "excess_ci95": [
+          -0.004,
+          0.677
+        ],
+        "profit_factor": 1.128,
+        "payoff": 1.302,
+        "avg_win": 8.512,
+        "avg_loss": -6.536
+      },
+      "t20": {
+        "n": 5058,
+        "mean_net": 1.319,
+        "median_net": -1.255,
+        "win_rate": 45.9,
+        "mean_excess": 0.685,
+        "beat_benchmark_rate": 43.0,
+        "excess_ci95": [
+          0.157,
+          1.222
+        ],
+        "profit_factor": 1.276,
+        "payoff": 1.503,
+        "avg_win": 13.301,
+        "avg_loss": -8.85
+      },
+      "arm": "仅加：回踩量≤常态量",
+      "key": "only_normal_volume",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 3359,
+      "stocks": 570,
+      "signal_days": 589,
+      "t5": {
+        "n": 3357,
+        "mean_net": 0.281,
+        "median_net": -0.353,
+        "win_rate": 47.2,
+        "mean_excess": 0.107,
+        "beat_benchmark_rate": 44.5,
+        "excess_ci95": [
+          -0.161,
+          0.344
+        ],
+        "profit_factor": 1.124,
+        "payoff": 1.258,
+        "avg_win": 5.379,
+        "avg_loss": -4.275
+      },
+      "t10": {
+        "n": 3357,
+        "mean_net": 0.802,
+        "median_net": -0.441,
+        "win_rate": 47.2,
+        "mean_excess": 0.31,
+        "beat_benchmark_rate": 42.0,
+        "excess_ci95": [
+          -0.2,
+          0.821
+        ],
+        "profit_factor": 1.245,
+        "payoff": 1.39,
+        "avg_win": 8.632,
+        "avg_loss": -6.211
+      },
+      "t20": {
+        "n": 3357,
+        "mean_net": 1.104,
+        "median_net": -0.646,
+        "win_rate": 47.7,
+        "mean_excess": -0.014,
+        "beat_benchmark_rate": 40.5,
+        "excess_ci95": [
+          -0.704,
+          0.63
+        ],
+        "profit_factor": 1.231,
+        "payoff": 1.351,
+        "avg_win": 12.355,
+        "avg_loss": -9.142
+      },
+      "arm": "仅加：回踩量≤常态量",
+      "key": "only_normal_volume",
+      "label": "留出段",
+      "pass_t5": false
+    },
+    {
+      "signals": 7243,
+      "stocks": 543,
+      "signal_days": 1121,
+      "t5": {
+        "n": 7237,
+        "mean_net": 0.338,
+        "median_net": -0.427,
+        "win_rate": 46.4,
+        "mean_excess": 0.186,
+        "beat_benchmark_rate": 43.8,
+        "excess_ci95": [
+          -0.007,
+          0.372
+        ],
+        "profit_factor": 1.146,
+        "payoff": 1.326,
+        "avg_win": 5.721,
+        "avg_loss": -4.316
+      },
+      "t10": {
+        "n": 7237,
+        "mean_net": 0.71,
+        "median_net": -0.492,
+        "win_rate": 47.2,
+        "mean_excess": 0.295,
+        "beat_benchmark_rate": 43.7,
+        "excess_ci95": [
+          0.006,
+          0.572
+        ],
+        "profit_factor": 1.214,
+        "payoff": 1.36,
+        "avg_win": 8.534,
+        "avg_loss": -6.274
+      },
+      "t20": {
+        "n": 7236,
+        "mean_net": 1.58,
+        "median_net": -0.953,
+        "win_rate": 47.0,
+        "mean_excess": 0.617,
+        "beat_benchmark_rate": 42.9,
+        "excess_ci95": [
+          0.163,
+          1.068
+        ],
+        "profit_factor": 1.345,
+        "payoff": 1.517,
+        "avg_win": 13.095,
+        "avg_loss": -8.632
+      },
+      "arm": "仅加：突破后冲高≤10%",
+      "key": "only_runup",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 4586,
+      "stocks": 577,
+      "signal_days": 622,
+      "t5": {
+        "n": 4583,
+        "mean_net": 0.089,
+        "median_net": -0.624,
+        "win_rate": 44.9,
+        "mean_excess": 0.123,
+        "beat_benchmark_rate": 43.2,
+        "excess_ci95": [
+          -0.164,
+          0.388
+        ],
+        "profit_factor": 1.038,
+        "payoff": 1.275,
+        "avg_win": 5.469,
+        "avg_loss": -4.289
+      },
+      "t10": {
+        "n": 4583,
+        "mean_net": 0.376,
+        "median_net": -0.744,
+        "win_rate": 45.5,
+        "mean_excess": 0.127,
+        "beat_benchmark_rate": 41.6,
+        "excess_ci95": [
+          -0.304,
+          0.545
+        ],
+        "profit_factor": 1.113,
+        "payoff": 1.335,
+        "avg_win": 8.188,
+        "avg_loss": -6.132
+      },
+      "t20": {
+        "n": 4583,
+        "mean_net": 0.679,
+        "median_net": -0.69,
+        "win_rate": 46.8,
+        "mean_excess": -0.007,
+        "beat_benchmark_rate": 40.6,
+        "excess_ci95": [
+          -0.597,
+          0.53
+        ],
+        "profit_factor": 1.142,
+        "payoff": 1.297,
+        "avg_win": 11.624,
+        "avg_loss": -8.959
+      },
+      "arm": "仅加：突破后冲高≤10%",
+      "key": "only_runup",
+      "label": "留出段",
+      "pass_t5": false
+    },
+    {
+      "signals": 7522,
+      "stocks": 550,
+      "signal_days": 1144,
+      "t5": {
+        "n": 7517,
+        "mean_net": 0.271,
+        "median_net": -0.442,
+        "win_rate": 46.4,
+        "mean_excess": 0.105,
+        "beat_benchmark_rate": 43.5,
+        "excess_ci95": [
+          -0.096,
+          0.287
+        ],
+        "profit_factor": 1.114,
+        "payoff": 1.285,
+        "avg_win": 5.712,
+        "avg_loss": -4.444
+      },
+      "t10": {
+        "n": 7517,
+        "mean_net": 0.622,
+        "median_net": -0.604,
+        "win_rate": 46.8,
+        "mean_excess": 0.217,
+        "beat_benchmark_rate": 43.6,
+        "excess_ci95": [
+          -0.074,
+          0.48
+        ],
+        "profit_factor": 1.183,
+        "payoff": 1.347,
+        "avg_win": 8.585,
+        "avg_loss": -6.372
+      },
+      "t20": {
+        "n": 7517,
+        "mean_net": 1.51,
+        "median_net": -1.011,
+        "win_rate": 46.8,
+        "mean_excess": 0.628,
+        "beat_benchmark_rate": 42.3,
+        "excess_ci95": [
+          0.146,
+          1.102
+        ],
+        "profit_factor": 1.325,
+        "payoff": 1.509,
+        "avg_win": 13.168,
+        "avg_loss": -8.729
+      },
+      "arm": "仅加：证据时效750根",
+      "key": "only_event_age",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 4731,
+      "stocks": 578,
+      "signal_days": 633,
+      "t5": {
+        "n": 4727,
+        "mean_net": 0.24,
+        "median_net": -0.568,
+        "win_rate": 45.4,
+        "mean_excess": -0.017,
+        "beat_benchmark_rate": 41.6,
+        "excess_ci95": [
+          -0.275,
+          0.213
+        ],
+        "profit_factor": 1.104,
+        "payoff": 1.327,
+        "avg_win": 5.602,
+        "avg_loss": -4.222
+      },
+      "t10": {
+        "n": 4727,
+        "mean_net": 0.772,
+        "median_net": -0.415,
+        "win_rate": 47.6,
+        "mean_excess": -0.038,
+        "beat_benchmark_rate": 39.9,
+        "excess_ci95": [
+          -0.412,
+          0.301
+        ],
+        "profit_factor": 1.24,
+        "payoff": 1.368,
+        "avg_win": 8.379,
+        "avg_loss": -6.126
+      },
+      "t20": {
+        "n": 4727,
+        "mean_net": 1.706,
+        "median_net": -0.014,
+        "win_rate": 49.9,
+        "mean_excess": -0.174,
+        "beat_benchmark_rate": 39.1,
+        "excess_ci95": [
+          -0.698,
+          0.287
+        ],
+        "profit_factor": 1.377,
+        "payoff": 1.38,
+        "avg_win": 12.479,
+        "avg_loss": -9.045
+      },
+      "arm": "仅加：证据时效750根",
+      "key": "only_event_age",
+      "label": "留出段",
+      "pass_t5": false
+    },
+    {
+      "signals": 3287,
+      "stocks": 526,
+      "signal_days": 922,
+      "t5": {
+        "n": 3287,
+        "mean_net": 0.152,
+        "median_net": -0.349,
+        "win_rate": 46.3,
+        "mean_excess": 0.168,
+        "beat_benchmark_rate": 45.1,
+        "excess_ci95": [
+          -0.057,
+          0.406
+        ],
+        "profit_factor": 1.071,
+        "payoff": 1.242,
+        "avg_win": 4.956,
+        "avg_loss": -3.992
+      },
+      "t10": {
+        "n": 3287,
+        "mean_net": 0.36,
+        "median_net": -0.604,
+        "win_rate": 46.6,
+        "mean_excess": 0.335,
+        "beat_benchmark_rate": 45.9,
+        "excess_ci95": [
+          -0.051,
+          0.715
+        ],
+        "profit_factor": 1.113,
+        "payoff": 1.273,
+        "avg_win": 7.621,
+        "avg_loss": -5.986
+      },
+      "t20": {
+        "n": 3287,
+        "mean_net": 1.466,
+        "median_net": -1.076,
+        "win_rate": 46.7,
+        "mean_excess": 0.899,
+        "beat_benchmark_rate": 44.1,
+        "excess_ci95": [
+          0.28,
+          1.523
+        ],
+        "profit_factor": 1.341,
+        "payoff": 1.53,
+        "avg_win": 12.36,
+        "avg_loss": -8.078
+      },
+      "arm": "修复后规则（当前默认，大盘只标注）",
+      "key": "new",
+      "label": "开发段",
+      "pass_t5": false
+    },
+    {
+      "signals": 2047,
+      "stocks": 535,
+      "signal_days": 497,
+      "t5": {
+        "n": 2046,
+        "mean_net": 0.305,
+        "median_net": -0.2,
+        "win_rate": 47.8,
+        "mean_excess": 0.222,
+        "beat_benchmark_rate": 45.4,
+        "excess_ci95": [
+          -0.178,
+          0.563
+        ],
+        "profit_factor": 1.149,
+        "payoff": 1.258,
+        "avg_win": 4.911,
+        "avg_loss": -3.904
+      },
+      "t10": {
+        "n": 2046,
+        "mean_net": 0.555,
+        "median_net": -0.39,
+        "win_rate": 47.4,
+        "mean_excess": 0.205,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.351,
+          0.703
+        ],
+        "profit_factor": 1.187,
+        "payoff": 1.317,
+        "avg_win": 7.434,
+        "avg_loss": -5.647
+      },
+      "t20": {
+        "n": 2046,
+        "mean_net": 0.796,
+        "median_net": -0.337,
+        "win_rate": 48.7,
+        "mean_excess": 0.129,
+        "beat_benchmark_rate": 42.3,
+        "excess_ci95": [
+          -0.67,
+          0.82
+        ],
+        "profit_factor": 1.178,
+        "payoff": 1.242,
+        "avg_win": 10.828,
+        "avg_loss": -8.719
+      },
+      "arm": "修复后规则（当前默认，大盘只标注）",
+      "key": "new",
+      "label": "留出段",
+      "pass_t5": false
+    },
+    {
+      "signals": 1700,
+      "stocks": 477,
+      "signal_days": 421,
+      "t5": {
+        "n": 1700,
+        "mean_net": 0.325,
+        "median_net": -0.34,
+        "win_rate": 46.6,
+        "mean_excess": 0.37,
+        "beat_benchmark_rate": 45.7,
+        "excess_ci95": [
+          0.025,
+          0.72
+        ],
+        "profit_factor": 1.148,
+        "payoff": 1.316,
+        "avg_win": 5.425,
+        "avg_loss": -4.123
+      },
+      "t10": {
+        "n": 1700,
+        "mean_net": 0.664,
+        "median_net": -0.491,
+        "win_rate": 47.7,
+        "mean_excess": 0.545,
+        "beat_benchmark_rate": 46.5,
+        "excess_ci95": [
+          0.027,
+          1.059
+        ],
+        "profit_factor": 1.199,
+        "payoff": 1.315,
+        "avg_win": 8.377,
+        "avg_loss": -6.372
+      },
+      "t20": {
+        "n": 1700,
+        "mean_net": 1.927,
+        "median_net": -0.665,
+        "win_rate": 48.4,
+        "mean_excess": 0.984,
+        "beat_benchmark_rate": 43.6,
+        "excess_ci95": [
+          0.268,
+          1.782
+        ],
+        "profit_factor": 1.445,
+        "payoff": 1.543,
+        "avg_win": 12.942,
+        "avg_loss": -8.386
+      },
+      "arm": "修复后 + 大盘偏弱不买（已有对照，不是默认）",
+      "key": "new_downgrade",
+      "label": "开发段",
+      "pass_t5": true
+    },
+    {
+      "signals": 1314,
+      "stocks": 489,
+      "signal_days": 253,
+      "t5": {
+        "n": 1314,
+        "mean_net": 0.664,
+        "median_net": 0.035,
+        "win_rate": 50.5,
+        "mean_excess": 0.401,
+        "beat_benchmark_rate": 46.1,
+        "excess_ci95": [
+          -0.049,
+          0.788
+        ],
+        "profit_factor": 1.372,
+        "payoff": 1.343,
+        "avg_win": 4.846,
+        "avg_loss": -3.608
+      },
+      "t10": {
+        "n": 1314,
+        "mean_net": 1.297,
+        "median_net": 0.189,
+        "win_rate": 50.9,
+        "mean_excess": 0.568,
+        "beat_benchmark_rate": 43.5,
+        "excess_ci95": [
+          0.04,
+          1.001
+        ],
+        "profit_factor": 1.523,
+        "payoff": 1.468,
+        "avg_win": 7.424,
+        "avg_loss": -5.057
+      },
+      "t20": {
+        "n": 1314,
+        "mean_net": 1.741,
+        "median_net": 0.317,
+        "win_rate": 51.6,
+        "mean_excess": 0.629,
+        "beat_benchmark_rate": 44.0,
+        "excess_ci95": [
+          -0.281,
+          1.391
+        ],
+        "profit_factor": 1.45,
+        "payoff": 1.36,
+        "avg_win": 10.875,
+        "avg_loss": -7.996
+      },
+      "arm": "修复后 + 大盘偏弱不买（已有对照，不是默认）",
+      "key": "new_downgrade",
+      "label": "留出段",
+      "pass_t5": false
+    }
+  ],
+  "line_stop_primary": [
+    {
+      "n": 3095,
+      "mean": 0.075,
+      "median": -3.445,
+      "win_rate": 14.1,
+      "avg_win": 27.79,
+      "avg_loss": -4.47,
+      "profit_factor": 1.02,
+      "stopped_rate": 86.3,
+      "median_days": 7.0,
+      "paired": 0.276,
+      "paired_ci95": [
+        -0.354,
+        0.915
+      ],
+      "label": "开发段 2019-01～2023-09"
+    },
+    {
+      "n": 2070,
+      "mean": 0.64,
+      "median": -3.343,
+      "win_rate": 16.5,
+      "avg_win": 25.32,
+      "avg_loss": -4.24,
+      "profit_factor": 1.18,
+      "stopped_rate": 83.6,
+      "median_days": 8.0,
+      "paired": 0.423,
+      "paired_ci95": [
+        -0.312,
+        1.092
+      ],
+      "label": "留出段 2024-01～"
+    }
+  ],
+  "triangle_primary": [
+    {
+      "n": 2878,
+      "mean": 0.493,
+      "median": -7.477,
+      "win_rate": 34.0,
+      "avg_win": 24.45,
+      "avg_loss": -11.84,
+      "profit_factor": 1.06,
+      "stopped_rate": 53.4,
+      "median_days": 54.0,
+      "paired": -0.614,
+      "paired_ci95": [
+        -1.637,
+        0.417
+      ],
+      "label": "开发段 2019-01～2023-09"
+    },
+    {
+      "n": 1917,
+      "mean": 0.188,
+      "median": -8.221,
+      "win_rate": 32.0,
+      "avg_win": 26.06,
+      "avg_loss": -11.97,
+      "profit_factor": 1.02,
+      "stopped_rate": 57.5,
+      "median_days": 43.0,
+      "paired": -0.946,
+      "paired_ci95": [
+        -2.199,
+        0.276
+      ],
+      "label": "留出段 2024-01～"
+    }
+  ],
+  "features": [
+    {
+      "feature": "normal_volume_ratio",
+      "label": "回踩日量 / 突破前10日均量",
+      "auc": 0.493,
+      "z": -0.88,
+      "auc_dev": 0.502,
+      "auc_holdout": 0.478,
+      "stable": false,
+      "median_win": 0.821,
+      "median_loss": 0.832,
+      "wins": 2499,
+      "losses": 2834
+    },
+    {
+      "feature": "runup_pct",
+      "label": "突破后最高越线 %",
+      "auc": 0.498,
+      "z": -0.28,
+      "auc_dev": 0.495,
+      "auc_holdout": 0.503,
+      "stable": false,
+      "median_win": 4.552,
+      "median_loss": 4.617,
+      "wins": 2499,
+      "losses": 2834
+    },
+    {
+      "feature": "line_points",
+      "label": "精准线独立验证事件数",
+      "auc": 0.506,
+      "z": 0.71,
+      "auc_dev": 0.509,
+      "auc_holdout": 0.498,
+      "stable": false,
+      "median_win": 9.0,
+      "median_loss": 9.0,
+      "wins": 2499,
+      "losses": 2834
+    },
+    {
+      "feature": "calendar_gap",
+      "label": "突破日到信号日的自然日间隔",
+      "auc": 0.514,
+      "z": 1.74,
+      "auc_dev": 0.505,
+      "auc_holdout": 0.527,
+      "stable": false,
+      "median_win": 4.0,
+      "median_loss": 4.0,
+      "wins": 2499,
+      "losses": 2834
+    }
+  ],
+  "feature_sample": {
+    "n": 5333,
+    "wins": 2499,
+    "losses": 2834
+  },
+  "quintile_pairs": [
+    {
+      "label": "回踩日量 / 突破前10日均量",
+      "bin": "(-inf, 0.686]",
+      "dev_n": 658,
+      "dev_excess": 0.332,
+      "hold_n": 393,
+      "hold_excess": -0.098
+    },
+    {
+      "label": "回踩日量 / 突破前10日均量",
+      "bin": "(0.686, 0.784]",
+      "dev_n": 663,
+      "dev_excess": 0.158,
+      "hold_n": 383,
+      "hold_excess": 0.261
+    },
+    {
+      "label": "回踩日量 / 突破前10日均量",
+      "bin": "(0.784, 0.861]",
+      "dev_n": 655,
+      "dev_excess": -0.235,
+      "hold_n": 419,
+      "hold_excess": 0.76
+    },
+    {
+      "label": "回踩日量 / 突破前10日均量",
+      "bin": "(0.861, 0.933]",
+      "dev_n": 655,
+      "dev_excess": 0.219,
+      "hold_n": 447,
+      "hold_excess": 0.133
+    },
+    {
+      "label": "回踩日量 / 突破前10日均量",
+      "bin": "(0.933, inf]",
+      "dev_n": 656,
+      "dev_excess": 0.365,
+      "hold_n": 404,
+      "hold_excess": 0.034
+    },
+    {
+      "label": "突破后最高越线 %",
+      "bin": "(-inf, 2.874]",
+      "dev_n": 658,
+      "dev_excess": 0.024,
+      "hold_n": 450,
+      "hold_excess": 0.132
+    },
+    {
+      "label": "突破后最高越线 %",
+      "bin": "(2.874, 4.052]",
+      "dev_n": 657,
+      "dev_excess": 0.308,
+      "hold_n": 421,
+      "hold_excess": 0.405
+    },
+    {
+      "label": "突破后最高越线 %",
+      "bin": "(4.052, 5.343]",
+      "dev_n": 657,
+      "dev_excess": 0.188,
+      "hold_n": 406,
+      "hold_excess": 0.091
+    },
+    {
+      "label": "突破后最高越线 %",
+      "bin": "(5.343, 7.166]",
+      "dev_n": 657,
+      "dev_excess": 0.593,
+      "hold_n": 388,
+      "hold_excess": 0.121
+    },
+    {
+      "label": "突破后最高越线 %",
+      "bin": "(7.166, inf]",
+      "dev_n": 658,
+      "dev_excess": -0.271,
+      "hold_n": 381,
+      "hold_excess": 0.366
+    },
+    {
+      "label": "精准线独立验证事件数",
+      "bin": "(-inf, 5.0]",
+      "dev_n": 956,
+      "dev_excess": -0.048,
+      "hold_n": 464,
+      "hold_excess": -0.06
+    },
+    {
+      "label": "精准线独立验证事件数",
+      "bin": "(5.0, 7.0]",
+      "dev_n": 549,
+      "dev_excess": 0.322,
+      "hold_n": 288,
+      "hold_excess": 0.081
+    },
+    {
+      "label": "精准线独立验证事件数",
+      "bin": "(7.0, 10.0]",
+      "dev_n": 612,
+      "dev_excess": -0.0,
+      "hold_n": 371,
+      "hold_excess": 0.505
+    },
+    {
+      "label": "精准线独立验证事件数",
+      "bin": "(10.0, 14.0]",
+      "dev_n": 540,
+      "dev_excess": 0.263,
+      "hold_n": 367,
+      "hold_excess": 0.527
+    },
+    {
+      "label": "精准线独立验证事件数",
+      "bin": "(14.0, inf]",
+      "dev_n": 630,
+      "dev_excess": 0.444,
+      "hold_n": 556,
+      "hold_excess": 0.139
+    },
+    {
+      "label": "突破日到信号日的自然日间隔",
+      "bin": "(-inf, 2.0]",
+      "dev_n": 1153,
+      "dev_excess": 0.068,
+      "hold_n": 689,
+      "hold_excess": 0.205
+    },
+    {
+      "label": "突破日到信号日的自然日间隔",
+      "bin": "(2.0, 3.0]",
+      "dev_n": 318,
+      "dev_excess": 0.573,
+      "hold_n": 188,
+      "hold_excess": 0.759
+    },
+    {
+      "label": "突破日到信号日的自然日间隔",
+      "bin": "(3.0, 5.0]",
+      "dev_n": 621,
+      "dev_excess": 0.087,
+      "hold_n": 368,
+      "hold_excess": 0.306
+    },
+    {
+      "label": "突破日到信号日的自然日间隔",
+      "bin": "(5.0, 7.0]",
+      "dev_n": 557,
+      "dev_excess": 0.214,
+      "hold_n": 359,
+      "hold_excess": 0.361
+    },
+    {
+      "label": "突破日到信号日的自然日间隔",
+      "bin": "(7.0, inf]",
+      "dev_n": 638,
+      "dev_excess": 0.186,
+      "hold_n": 442,
+      "hold_excess": -0.165
+    }
+  ],
+  "categories": [
+    {
+      "field": "突破日涨停",
+      "value": "是",
+      "period": "开发段",
+      "n": 91,
+      "win_rate": 45.1,
+      "mean_net": -0.002,
+      "mean_excess": -0.103
+    },
+    {
+      "field": "突破日涨停",
+      "value": "否",
+      "period": "开发段",
+      "n": 3196,
+      "win_rate": 46.3,
+      "mean_net": 0.156,
+      "mean_excess": 0.176
+    },
+    {
+      "field": "信号日大盘偏弱",
+      "value": "是",
+      "period": "开发段",
+      "n": 1587,
+      "win_rate": 46.0,
+      "mean_net": -0.035,
+      "mean_excess": -0.048
+    },
+    {
+      "field": "信号日大盘偏弱",
+      "value": "否",
+      "period": "开发段",
+      "n": 1700,
+      "win_rate": 46.6,
+      "mean_net": 0.325,
+      "mean_excess": 0.37
+    },
+    {
+      "field": "板块",
+      "value": "主板",
+      "period": "开发段",
+      "n": 2504,
+      "win_rate": 46.0,
+      "mean_net": 0.182,
+      "mean_excess": 0.265
+    },
+    {
+      "field": "板块",
+      "value": "创业板",
+      "period": "开发段",
+      "n": 650,
+      "win_rate": 48.0,
+      "mean_net": 0.15,
+      "mean_excess": -0.123
+    },
+    {
+      "field": "板块",
+      "value": "科创板",
+      "period": "开发段",
+      "n": 133,
+      "win_rate": 42.9,
+      "mean_net": -0.402,
+      "mean_excess": -0.233
+    },
+    {
+      "field": "突破日涨停",
+      "value": "是",
+      "period": "留出段",
+      "n": 46,
+      "win_rate": 32.6,
+      "mean_net": -1.334,
+      "mean_excess": -0.896
+    },
+    {
+      "field": "突破日涨停",
+      "value": "否",
+      "period": "留出段",
+      "n": 2000,
+      "win_rate": 48.1,
+      "mean_net": 0.343,
+      "mean_excess": 0.247
+    },
+    {
+      "field": "信号日大盘偏弱",
+      "value": "是",
+      "period": "留出段",
+      "n": 732,
+      "win_rate": 42.8,
+      "mean_net": -0.34,
+      "mean_excess": -0.1
+    },
+    {
+      "field": "信号日大盘偏弱",
+      "value": "否",
+      "period": "留出段",
+      "n": 1314,
+      "win_rate": 50.5,
+      "mean_net": 0.664,
+      "mean_excess": 0.401
+    },
+    {
+      "field": "板块",
+      "value": "主板",
+      "period": "留出段",
+      "n": 1427,
+      "win_rate": 47.2,
+      "mean_net": 0.207,
+      "mean_excess": 0.149
+    },
+    {
+      "field": "板块",
+      "value": "创业板",
+      "period": "留出段",
+      "n": 420,
+      "win_rate": 49.5,
+      "mean_net": 0.808,
+      "mean_excess": 0.764
+    },
+    {
+      "field": "板块",
+      "value": "科创板",
+      "period": "留出段",
+      "n": 199,
+      "win_rate": 47.7,
+      "mean_net": -0.056,
+      "mean_excess": -0.404
+    }
+  ],
+  "limit_up_compare": [
+    {
+      "signals": 3287,
+      "stocks": 526,
+      "signal_days": 922,
+      "t5": {
+        "n": 3287,
+        "mean_net": 0.152,
+        "median_net": -0.349,
+        "win_rate": 46.3,
+        "mean_excess": 0.168,
+        "beat_benchmark_rate": 45.1,
+        "excess_ci95": [
+          -0.057,
+          0.406
+        ],
+        "profit_factor": 1.071,
+        "payoff": 1.242,
+        "avg_win": 4.956,
+        "avg_loss": -3.992
+      },
+      "t10": {
+        "n": 3287,
+        "mean_net": 0.36,
+        "median_net": -0.604,
+        "win_rate": 46.6,
+        "mean_excess": 0.335,
+        "beat_benchmark_rate": 45.9,
+        "excess_ci95": [
+          -0.051,
+          0.715
+        ],
+        "profit_factor": 1.113,
+        "payoff": 1.273,
+        "avg_win": 7.621,
+        "avg_loss": -5.986
+      },
+      "t20": {
+        "n": 3287,
+        "mean_net": 1.466,
+        "median_net": -1.076,
+        "win_rate": 46.7,
+        "mean_excess": 0.899,
+        "beat_benchmark_rate": 44.1,
+        "excess_ci95": [
+          0.28,
+          1.523
+        ],
+        "profit_factor": 1.341,
+        "payoff": 1.53,
+        "avg_win": 12.36,
+        "avg_loss": -8.078
+      },
+      "label": "开发段",
+      "variant": "当前默认"
+    },
+    {
+      "signals": 3196,
+      "stocks": 526,
+      "signal_days": 911,
+      "t5": {
+        "n": 3196,
+        "mean_net": 0.156,
+        "median_net": -0.348,
+        "win_rate": 46.3,
+        "mean_excess": 0.176,
+        "beat_benchmark_rate": 45.2,
+        "excess_ci95": [
+          -0.047,
+          0.415
+        ],
+        "profit_factor": 1.073,
+        "payoff": 1.243,
+        "avg_win": 4.933,
+        "avg_loss": -3.969
+      },
+      "t10": {
+        "n": 3196,
+        "mean_net": 0.356,
+        "median_net": -0.614,
+        "win_rate": 46.5,
+        "mean_excess": 0.331,
+        "beat_benchmark_rate": 46.0,
+        "excess_ci95": [
+          -0.058,
+          0.717
+        ],
+        "profit_factor": 1.112,
+        "payoff": 1.278,
+        "avg_win": 7.599,
+        "avg_loss": -5.945
+      },
+      "t20": {
+        "n": 3196,
+        "mean_net": 1.476,
+        "median_net": -1.064,
+        "win_rate": 46.7,
+        "mean_excess": 0.901,
+        "beat_benchmark_rate": 44.1,
+        "excess_ci95": [
+          0.281,
+          1.528
+        ],
+        "profit_factor": 1.344,
+        "payoff": 1.537,
+        "avg_win": 12.353,
+        "avg_loss": -8.037
+      },
+      "label": "开发段",
+      "variant": "去掉突破日涨停"
+    },
+    {
+      "signals": 2047,
+      "stocks": 535,
+      "signal_days": 497,
+      "t5": {
+        "n": 2046,
+        "mean_net": 0.305,
+        "median_net": -0.2,
+        "win_rate": 47.8,
+        "mean_excess": 0.222,
+        "beat_benchmark_rate": 45.4,
+        "excess_ci95": [
+          -0.178,
+          0.563
+        ],
+        "profit_factor": 1.149,
+        "payoff": 1.258,
+        "avg_win": 4.911,
+        "avg_loss": -3.904
+      },
+      "t10": {
+        "n": 2046,
+        "mean_net": 0.555,
+        "median_net": -0.39,
+        "win_rate": 47.4,
+        "mean_excess": 0.205,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.351,
+          0.703
+        ],
+        "profit_factor": 1.187,
+        "payoff": 1.317,
+        "avg_win": 7.434,
+        "avg_loss": -5.647
+      },
+      "t20": {
+        "n": 2046,
+        "mean_net": 0.796,
+        "median_net": -0.337,
+        "win_rate": 48.7,
+        "mean_excess": 0.129,
+        "beat_benchmark_rate": 42.3,
+        "excess_ci95": [
+          -0.67,
+          0.82
+        ],
+        "profit_factor": 1.178,
+        "payoff": 1.242,
+        "avg_win": 10.828,
+        "avg_loss": -8.719
+      },
+      "label": "留出段",
+      "variant": "当前默认"
+    },
+    {
+      "signals": 2001,
+      "stocks": 533,
+      "signal_days": 495,
+      "t5": {
+        "n": 2000,
+        "mean_net": 0.343,
+        "median_net": -0.2,
+        "win_rate": 48.1,
+        "mean_excess": 0.247,
+        "beat_benchmark_rate": 45.6,
+        "excess_ci95": [
+          -0.168,
+          0.603
+        ],
+        "profit_factor": 1.17,
+        "payoff": 1.262,
+        "avg_win": 4.912,
+        "avg_loss": -3.892
+      },
+      "t10": {
+        "n": 2000,
+        "mean_net": 0.57,
+        "median_net": -0.357,
+        "win_rate": 47.6,
+        "mean_excess": 0.204,
+        "beat_benchmark_rate": 42.6,
+        "excess_ci95": [
+          -0.381,
+          0.734
+        ],
+        "profit_factor": 1.193,
+        "payoff": 1.313,
+        "avg_win": 7.401,
+        "avg_loss": -5.635
+      },
+      "t20": {
+        "n": 2000,
+        "mean_net": 0.774,
+        "median_net": -0.298,
+        "win_rate": 48.9,
+        "mean_excess": 0.104,
+        "beat_benchmark_rate": 42.4,
+        "excess_ci95": [
+          -0.716,
+          0.806
+        ],
+        "profit_factor": 1.173,
+        "payoff": 1.226,
+        "avg_win": 10.704,
+        "avg_loss": -8.729
+      },
+      "label": "留出段",
+      "variant": "去掉突破日涨停"
+    }
+  ],
+  "limit_up_deltas": {
+    "dev_before": 0.168,
+    "dev_after": 0.176,
+    "hold_before": 0.222,
+    "hold_after": 0.247,
+    "dev_dropped": 91,
+    "hold_dropped": 46
+  },
+  "limit_up_line": {
+    "n": 46,
+    "paired": 0.541
+  },
+  "unfilled": {
+    "n": 1,
+    "stock_code": "001299",
+    "signal_date": "2025-03-26"
+  },
+  "published_verdicts": {
+    "old": "未达标（开发段未达标，留出段未达标）",
+    "only_normal_volume": "未达标（开发段未达标，留出段未达标）",
+    "only_runup": "未达标（开发段未达标，留出段未达标）",
+    "only_event_age": "未达标（开发段未达标，留出段未达标）",
+    "new": "未达标（开发段未达标，留出段未达标）",
+    "new_downgrade": "未达标（开发段达标，留出段未达标）"
+  }
+}
