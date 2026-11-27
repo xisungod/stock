@@ -24,6 +24,8 @@ BREAK_PCT = 0.015
 TRIANGLE_BREAK_PCT = 0.005
 TRIANGLE_MIN_SHARED_BARS = 15
 TRIANGLE_MAX_FIRST_SWING_RATIO = 1.5
+# 扫描默认仍是两峰两谷。3 表示上下沿在突破前都必须再被确认触到一次，本轮只作对照，不改默认。
+TRIANGLE_MIN_TOUCHES_PER_SIDE = 2
 WAIT_BARS = 40
 MAX_DRAWN = 200  # 只为防止异常数据撑大接口；正常全历史也到不了这么多
 PATTERN_NOTE = "只用已确认峰谷和已收盘 K 线识别，形态仅作结构参考。"
@@ -240,12 +242,22 @@ def confirmation_volume_ratio(bars: pd.DataFrame, index: int, lookback: int = 10
     return current / average
 
 
-def triangle_up_breakouts(bars: pd.DataFrame) -> list[dict[str, Any]]:
+def _rail_touches(pivots: list[dict[str, Any]]) -> tuple[int, int]:
+    """突破前已经被收进边界的峰、谷个数。确认日当天才确认的新点还不在这张表里。"""
+    peaks = sum(1 for pivot in pivots if pivot["kind"] == "P")
+    valleys = sum(1 for pivot in pivots if pivot["kind"] == "V")
+    return peaks, valleys
+
+
+def triangle_up_breakouts(bars: pd.DataFrame, min_touches_per_side: int = TRIANGLE_MIN_TOUCHES_PER_SIDE) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 
-    认定与 `find_triangles` 是同一份。调用方必须只传入截至信号日的已收盘 K 线；
-    这里不再向后看。向下突破和仍在收敛的形态不产生买入。
+    默认上下沿各 2 个触点就够，与现行扫描一致。`min_touches_per_side=3` 时，
+    突破之前上沿至少还要被一个峰、下沿至少还要被一个谷确认贴住，否则这次收盘突破不算这个形态。
+    触点只计确认日早于突破检查的点，不看突破日之后的峰谷。
     """
+    if min_touches_per_side < 2:
+        raise ValueError("每边触点至少为 2")
     if len(bars) < 30:
         return []
     close = bars["close"].to_numpy(dtype=float)
@@ -253,6 +265,9 @@ def triangle_up_breakouts(bars: pd.DataFrame) -> list[dict[str, Any]]:
     for triangle in find_triangles(pattern_pivots(bars), close):
         entry = triangle.get("entry")
         if entry is None:
+            continue
+        peaks, valleys = _rail_touches(triangle["pivots"])
+        if peaks < min_touches_per_side or valleys < min_touches_per_side:
             continue
         upper = float(triangle["upper"](entry))
         events.append({
@@ -262,6 +277,8 @@ def triangle_up_breakouts(bars: pd.DataFrame) -> list[dict[str, Any]]:
             "upper": upper,
             "stop": float(triangle["stop"]),
             "width_ratio": float(triangle["width_ratio"]),
+            "peak_touches": peaks,
+            "valley_touches": valleys,
             "event_id": f"triangle:{int(triangle['start'])}:{int(entry)}",
         })
     return events

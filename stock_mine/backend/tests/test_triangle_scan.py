@@ -43,6 +43,14 @@ def test_upward_breakout_is_a_buy_only_on_the_confirmation_close():
     assert result is None or result.category.value != "buy_alert"
 
 
+def test_three_touches_per_side_is_stricter_than_the_default_two():
+    bars = path_bars(TRIANGLE_KNOTS)
+    (event,) = triangle_up_breakouts(bars)
+    assert event["peak_touches"] >= 2 and event["valley_touches"] >= 2
+    stricter = max(event["peak_touches"], event["valley_touches"]) + 1
+    assert triangle_up_breakouts(bars, min_touches_per_side=stricter) == []
+
+
 def test_breakout_does_not_use_bars_after_the_signal_day():
     bars = path_bars(TRIANGLE_KNOTS)
     (event,) = triangle_up_breakouts(bars)
