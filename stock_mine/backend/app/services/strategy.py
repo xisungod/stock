@@ -101,6 +101,8 @@ class StrategyConfig:
     # 突破日至信号日的最高价越线超过该比例后又回到线附近，属冲高回落而不是回踩。
     # None 保留此规则之前的批次。
     max_post_breakout_runup_pct: float | None = None
+    # 回踩最低价相对这段最高价至少回落该比例，轻微回落不算确认。None 表示不设下限。
+    min_pullback_depth_pct: float | None = None
     # 买入预警要求突破前该根数之内有足够的独立验证（platform_events 为 confirmed_event_count，
     # legacy 为 min_line_strength）；更早的证据只保留展示。None 保留全历史计数的旧批次。
     max_event_age_bars: int | None = None
@@ -158,7 +160,10 @@ class StrategyConfig:
             raise ValueError("event counts must satisfy 2 <= candidate <= confirmed")
         if self.precision_engine == "platform_events" and self.lookback_days is not None:
             raise ValueError("platform_events uses full history; limit replay output instead")
-        for name in ("pullback_max_normal_volume_ratio", "max_post_breakout_runup_pct", "triangle_max_close_extension_pct"):
+        for name in (
+            "pullback_max_normal_volume_ratio", "max_post_breakout_runup_pct",
+            "triangle_max_close_extension_pct", "min_pullback_depth_pct",
+        ):
             value = getattr(self, name)
             if value is not None and (isinstance(value, bool) or not np.isfinite(value) or value <= 0):
                 raise ValueError(f"{name} must be positive or None")
@@ -1488,7 +1493,7 @@ def _pullback_check(
 
 PULLBACK_CONDITIONS = (
     "in_window", "touched", "recovered", "not_extended", "shrink_vs_breakout",
-    "held_line", "normal_volume_ok", "runup_ok",
+    "held_line", "normal_volume_ok", "runup_ok", "depth_ok",
 )
 
 
@@ -1521,6 +1526,10 @@ def _pullback_conditions(df: pd.DataFrame, line_price: float, breakout: dict[str
         # 无法核验常态量（历史太短）时不放行：规则启用后宁缺毋滥。
         "normal_volume_ok": limit is None or (normal_ratio is not None and normal_ratio <= limit + 1e-12),
         "runup_ok": runup_limit is None or peak <= line_price * (1 + runup_limit) * (1 + 1e-12),
+        # 从突破后最高价回落的幅度。不看最低价离线多远，也不看收盘是否站回线。
+        "depth_ok": cfg.min_pullback_depth_pct is None or (
+            peak > 0 and (peak - low) / peak + 1e-12 >= cfg.min_pullback_depth_pct
+        ),
         "volume_ratio": volume / breakout_volume if breakout_volume > 0 else None,
         "normal_volume_ratio": normal_ratio,
         "max_runup_pct": (peak / line_price - 1) * 100 if line_price > 0 else None,
