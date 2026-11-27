@@ -221,6 +221,25 @@ def detect_chart_patterns(bars: pd.DataFrame, dates: list[str]) -> dict[str, Any
             "as_of": dates[len(bars) - 1] if dates else None}
 
 
+def confirmation_volume_ratio(bars: pd.DataFrame, index: int, lookback: int = 10) -> float | None:
+    """确认日成交量除以确认日之前 lookback 根的均量。
+
+    均量不含确认日本身，与精准线突破量比同一口径。历史不足、成交量缺失或均量为 0 时返回 None，
+    调用方不得把缺失当成放量通过。
+    """
+    if lookback < 1 or index < 1 or index >= len(bars):
+        return None
+    volume = bars["volume"].astype(float)
+    history = volume.iloc[max(0, index - lookback):index]
+    if len(history) < min(5, lookback):
+        return None
+    current = float(volume.iloc[index])
+    average = float(history.mean())
+    if not np.isfinite(current) or current < 0 or not np.isfinite(average) or average <= 0:
+        return None
+    return current / average
+
+
 def triangle_up_breakouts(bars: pd.DataFrame) -> list[dict[str, Any]]:
     """向上突破的确认日。每个形态最多一笔，确认日是收盘越过上沿的那一根。
 

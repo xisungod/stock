@@ -518,6 +518,16 @@ def _merge_pattern_results(stock_code, stock_name, df, cfg, precision, flag):
     return "ok", merged.suggestion, merged
 
 
+def _triangle_volume(df: pd.DataFrame, index: int, cfg: StrategyConfig) -> tuple[bool, float | None]:
+    """放量门槛用策略里已有的 vol_lookback 与 breakout_vol_mult，不另设倍数。"""
+    from app.services.chart_patterns import confirmation_volume_ratio
+
+    ratio = confirmation_volume_ratio(df, index, cfg.vol_lookback)
+    if not cfg.require_breakout_volume:
+        return True, ratio
+    return ratio is not None and ratio >= cfg.breakout_vol_mult, ratio
+
+
 def _triangle_buy_result(stock_code: str, stock_name: str, df: pd.DataFrame, event: dict[str, Any], cfg: StrategyConfig) -> SignalResult:
     index = int(event["signal_index"])
     close = float(df["close"].iloc[index])
@@ -525,7 +535,28 @@ def _triangle_buy_result(stock_code: str, stock_name: str, df: pd.DataFrame, eve
     distance = (close / upper - 1) * 100 if upper else 0.0
     stamp = _date_str(df["trade_date"].iloc[index])
     detected = _date_str(df["trade_date"].iloc[int(event["detected_index"])])
+    accepted, ratio = _triangle_volume(df, index, cfg)
     score = 55.0 + min(15.0, max(0.0, 0.6 - float(event["width_ratio"])) * 25)
+    reasons = [
+        "两峰两谷确立上下沿，共同区间收敛到起点宽度的 60% 以内",
+        f"识别日 {detected}，确认日 {stamp} 收盘高于上沿 0.5%",
+    ]
+    if ratio is not None:
+        reasons.append(f"确认日量是此前 {cfg.vol_lookback} 日均量的 {ratio:.2f} 倍")
+    if not accepted:
+        return SignalResult(
+            stock_code, stock_name, SignalCategory.WATCH, 45.0,
+            "观察机会：收盘越过三角形上沿，但确认日量能未达到放量门槛",
+            round(upper, 3), 4, stamp,
+            line_formation_date=detected, breakout_date=stamp, current_price=round(close, 3),
+            distance_to_line_pct=round(distance, 3), structure_score=45.0,
+            pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
+            breakout_volume_ratio=None if ratio is None else round(ratio, 3),
+            require_breakout_volume=True, breakout_volume_threshold=cfg.breakout_vol_mult,
+            reasons=reasons,
+            risks=[f"买入要求确认日量不低于此前 {cfg.vol_lookback} 日均量的 {cfg.breakout_vol_mult:g} 倍。"],
+            breakout_status={"tags": ["越过上沿但量未确认"], "width_ratio": round(float(event["width_ratio"]), 3)},
+        )
     return SignalResult(
         stock_code, stock_name, SignalCategory.BUY_ALERT, score,
         "买入预警：三角形整理向上突破，收盘越过上沿",
@@ -534,23 +565,25 @@ def _triangle_buy_result(stock_code: str, stock_name: str, df: pd.DataFrame, eve
         distance_to_line_pct=round(distance, 3), structure_score=score,
         pattern_type="triangle_breakout", precision_engine=cfg.precision_engine,
         signal_event_id=f"{stock_code}:{event['event_id']}",
-        require_breakout_volume=False,
-        reasons=[
-            "两峰两谷确立上下沿，共同区间收敛到起点宽度的 60% 以内",
-            f"识别日 {detected}，确认日 {stamp} 收盘高于上沿 0.5%",
-        ],
+        breakout_volume_ratio=None if ratio is None else round(ratio, 3),
+        require_breakout_volume=cfg.require_breakout_volume,
+        breakout_volume_threshold=cfg.breakout_vol_mult if cfg.require_breakout_volume else None,
+        reasons=reasons,
         risks=["结构突破提醒。是否优于同日基准，以同一规则的分段验证为准。"],
         breakout_status={"tags": ["向上突破"], "width_ratio": round(float(event["width_ratio"]), 3), "stop": round(float(event["stop"]), 3)},
     )
 
 
 def iter_triangle_buy_results(stock_code: str, stock_name: str, df: pd.DataFrame, cfg: StrategyConfig, start_idx: int = 0):
-    """整段只跑一次认定。每个向上突破只在其确认日产出买入预警。"""
+    """整段只跑一次认定。每个向上突破只在其确认日产出买入预警。放量门槛打开时，量不够的确认日不入选。"""
     from app.services.chart_patterns import triangle_up_breakouts
 
     for event in triangle_up_breakouts(df):
-        if event["signal_index"] >= start_idx:
-            yield event["signal_index"], _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+        if event["signal_index"] < start_idx:
+            continue
+        result = _triangle_buy_result(stock_code, stock_name, df, event, cfg)
+        if result.category == SignalCategory.BUY_ALERT:
+            yield event["signal_index"], result
 
 
 def _run_triangle_pipeline(
@@ -563,7 +596,8 @@ def _run_triangle_pipeline(
     event = next((item for item in triangle_up_breakouts(df) if item["signal_index"] == last), None)
     if event is not None:
         result = _triangle_buy_result(stock_code, stock_name, df, event, cfg)
-        return "ok", result.suggestion, result
+        stage = "ok" if result.category == SignalCategory.BUY_ALERT else "triangle_volume_unconfirmed"
+        return stage, result.suggestion, result
     active = active_triangle(df)
     if active is None:
         return "no_triangle", "截至信号日没有已确认的三角形向上突破", None

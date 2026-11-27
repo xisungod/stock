@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from app.schemas import ScanRequest
-from app.services.chart_patterns import triangle_up_breakouts
+from app.services.chart_patterns import confirmation_volume_ratio, triangle_up_breakouts
 from app.services.strategy import StrategyConfig, _run_triangle_pipeline
 
 TRIANGLE_KNOTS = [(0, 9.0), (15, 12.0), (30, 10.0), (42, 11.6), (54, 10.4), (75, 12.5), (85, 12.3)]
@@ -62,6 +62,27 @@ def test_breakout_does_not_use_bars_after_the_signal_day():
     })
     extended = pd.concat([extra, tail], ignore_index=True)
     assert any(item["event_id"] == event["event_id"] for item in triangle_up_breakouts(extended))
+
+
+def test_volume_gate_uses_the_existing_breakout_multiple_and_prior_bars_only():
+    bars = path_bars(TRIANGLE_KNOTS)
+    (event,) = triangle_up_breakouts(bars)
+    entry = event["signal_index"]
+    quiet = bars.copy()
+    gated = StrategyConfig(strategy_mode="triangle_breakout", signal_offset=0, require_breakout_volume=True)
+    assert gated.breakout_vol_mult == 1.5 and gated.vol_lookback == 10
+    stage, _message, result = _run_triangle_pipeline("000001", "测试", quiet.iloc[:entry + 1].reset_index(drop=True), gated)
+    assert stage == "triangle_volume_unconfirmed" and result.category.value == "watch"
+    loud = quiet.copy()
+    loud.loc[loud.index[entry], "volume"] = 1000.0 * 2
+    ratio = confirmation_volume_ratio(loud.iloc[:entry + 1].reset_index(drop=True), entry, gated.vol_lookback)
+    assert ratio is not None and ratio >= 1.5
+    stage, _message, result = _run_triangle_pipeline("000001", "测试", loud.iloc[:entry + 1].reset_index(drop=True), gated)
+    assert stage == "ok" and result.category.value == "buy_alert"
+    # 门槛关闭时，同样的平量突破仍是买入。这是上一轮基线规则。
+    open_gate = StrategyConfig(strategy_mode="triangle_breakout", signal_offset=0, require_breakout_volume=False)
+    stage, _message, result = _run_triangle_pipeline("000001", "测试", quiet.iloc[:entry + 1].reset_index(drop=True), open_gate)
+    assert result.category.value == "buy_alert"
 
 
 def test_dates_cover_the_synthetic_path():
