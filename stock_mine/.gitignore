@@ -1,0 +1,12 @@
+.venv/
+data/
+backend/data/
+output/
+frontend/node_modules/
+frontend/dist/
+*.db
+*.sqlite
+__pycache__/
+.pytest_cache/
+.DS_Store
+.playwright-cli/

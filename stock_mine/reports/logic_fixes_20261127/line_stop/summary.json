@@ -1,0 +1,443 @@
+{
+  "verdict": false,
+  "report": {
+    "当前默认（修复后规则，大盘只提示）": {
+      "20": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 3096,
+            "mean": 0.358,
+            "median": -2.965,
+            "win_rate": 24.4,
+            "avg_win": 14.5,
+            "avg_loss": -4.19,
+            "payoff": 3.46,
+            "profit_factor": 1.11,
+            "stopped_rate": 73.8,
+            "median_days": 7.0,
+            "median_risk_pct": 2.42,
+            "mean_r": 0.072
+          },
+          "control_mean": -0.062,
+          "paired_diff": 0.42,
+          "paired_ci": [
+            -0.041,
+            0.88
+          ],
+          "paired_positive_share": 36.4
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 2074,
+            "mean": 0.468,
+            "median": -2.843,
+            "win_rate": 28.6,
+            "avg_win": 11.69,
+            "avg_loss": -4.04,
+            "payoff": 2.9,
+            "profit_factor": 1.16,
+            "stopped_rate": 70.0,
+            "median_days": 8.0,
+            "median_risk_pct": 2.36,
+            "mean_r": 0.192
+          },
+          "control_mean": 0.13,
+          "paired_diff": 0.337,
+          "paired_ci": [
+            -0.116,
+            0.789
+          ],
+          "paired_positive_share": 39.0
+        }
+      },
+      "60": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 3095,
+            "mean": 0.075,
+            "median": -3.445,
+            "win_rate": 14.1,
+            "avg_win": 27.79,
+            "avg_loss": -4.47,
+            "payoff": 6.22,
+            "profit_factor": 1.02,
+            "stopped_rate": 86.3,
+            "median_days": 7.0,
+            "median_risk_pct": 2.42,
+            "mean_r": -0.021
+          },
+          "control_mean": -0.201,
+          "paired_diff": 0.276,
+          "paired_ci": [
+            -0.354,
+            0.915
+          ],
+          "paired_positive_share": 35.5
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 2070,
+            "mean": 0.64,
+            "median": -3.343,
+            "win_rate": 16.5,
+            "avg_win": 25.32,
+            "avg_loss": -4.24,
+            "payoff": 5.97,
+            "profit_factor": 1.18,
+            "stopped_rate": 83.6,
+            "median_days": 8.0,
+            "median_risk_pct": 2.36,
+            "mean_r": 0.301
+          },
+          "control_mean": 0.217,
+          "paired_diff": 0.423,
+          "paired_ci": [
+            -0.312,
+            1.092
+          ],
+          "paired_positive_share": 38.4
+        }
+      },
+      "120": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 3094,
+            "mean": 0.041,
+            "median": -3.579,
+            "win_rate": 9.9,
+            "avg_win": 41.68,
+            "avg_loss": -4.51,
+            "payoff": 9.24,
+            "profit_factor": 1.01,
+            "stopped_rate": 91.0,
+            "median_days": 7.0,
+            "median_risk_pct": 2.42,
+            "mean_r": 0.059
+          },
+          "control_mean": -0.268,
+          "paired_diff": 0.309,
+          "paired_ci": [
+            -0.544,
+            1.18
+          ],
+          "paired_positive_share": 36.0
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 2060,
+            "mean": 1.417,
+            "median": -3.46,
+            "win_rate": 13.1,
+            "avg_win": 39.37,
+            "avg_loss": -4.28,
+            "payoff": 9.19,
+            "profit_factor": 1.38,
+            "stopped_rate": 87.8,
+            "median_days": 8.0,
+            "median_risk_pct": 2.36,
+            "mean_r": 0.659
+          },
+          "control_mean": 0.916,
+          "paired_diff": 0.501,
+          "paired_ci": [
+            -0.502,
+            1.505
+          ],
+          "paired_positive_share": 40.8
+        }
+      }
+    },
+    "修复后 + 大盘偏弱不买": {
+      "20": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 1675,
+            "mean": 0.744,
+            "median": -2.91,
+            "win_rate": 26.3,
+            "avg_win": 15.04,
+            "avg_loss": -4.35,
+            "payoff": 3.46,
+            "profit_factor": 1.23,
+            "stopped_rate": 72.1,
+            "median_days": 7.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.178
+          },
+          "control_mean": 0.019,
+          "paired_diff": 0.725,
+          "paired_ci": [
+            0.13,
+            1.353
+          ],
+          "paired_positive_share": 39.0
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 1314,
+            "mean": 0.964,
+            "median": -2.682,
+            "win_rate": 31.9,
+            "avg_win": 11.66,
+            "avg_loss": -4.04,
+            "payoff": 2.88,
+            "profit_factor": 1.35,
+            "stopped_rate": 66.4,
+            "median_days": 9.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.367
+          },
+          "control_mean": 0.604,
+          "paired_diff": 0.36,
+          "paired_ci": [
+            -0.269,
+            0.955
+          ],
+          "paired_positive_share": 38.0
+        }
+      },
+      "60": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 1675,
+            "mean": 0.556,
+            "median": -3.378,
+            "win_rate": 15.5,
+            "avg_win": 29.05,
+            "avg_loss": -4.66,
+            "payoff": 6.24,
+            "profit_factor": 1.14,
+            "stopped_rate": 84.7,
+            "median_days": 7.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.191
+          },
+          "control_mean": -0.211,
+          "paired_diff": 0.766,
+          "paired_ci": [
+            -0.155,
+            1.74
+          ],
+          "paired_positive_share": 36.8
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 1314,
+            "mean": 1.072,
+            "median": -3.31,
+            "win_rate": 18.3,
+            "avg_win": 25.08,
+            "avg_loss": -4.29,
+            "payoff": 5.84,
+            "profit_factor": 1.31,
+            "stopped_rate": 81.6,
+            "median_days": 9.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.395
+          },
+          "control_mean": 0.632,
+          "paired_diff": 0.44,
+          "paired_ci": [
+            -0.327,
+            1.123
+          ],
+          "paired_positive_share": 35.2
+        }
+      },
+      "120": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 1675,
+            "mean": 0.692,
+            "median": -3.547,
+            "win_rate": 10.8,
+            "avg_win": 45.08,
+            "avg_loss": -4.69,
+            "payoff": 9.62,
+            "profit_factor": 1.17,
+            "stopped_rate": 89.8,
+            "median_days": 7.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.292
+          },
+          "control_mean": -0.253,
+          "paired_diff": 0.945,
+          "paired_ci": [
+            -0.26,
+            2.157
+          ],
+          "paired_positive_share": 36.9
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 1313,
+            "mean": 2.297,
+            "median": -3.42,
+            "win_rate": 14.7,
+            "avg_win": 40.76,
+            "avg_loss": -4.33,
+            "payoff": 9.41,
+            "profit_factor": 1.62,
+            "stopped_rate": 85.9,
+            "median_days": 9.0,
+            "median_risk_pct": 2.41,
+            "mean_r": 0.971
+          },
+          "control_mean": 1.823,
+          "paired_diff": 0.474,
+          "paired_ci": [
+            -0.51,
+            1.593
+          ],
+          "paired_positive_share": 35.6
+        }
+      }
+    },
+    "修复前规则": {
+      "20": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 8996,
+            "mean": 0.334,
+            "median": -3.25,
+            "win_rate": 24.5,
+            "avg_win": 15.6,
+            "avg_loss": -4.62,
+            "payoff": 3.37,
+            "profit_factor": 1.1,
+            "stopped_rate": 74.1,
+            "median_days": 7.0,
+            "median_risk_pct": 2.64,
+            "mean_r": 0.082
+          },
+          "control_mean": 0.206,
+          "paired_diff": 0.128,
+          "paired_ci": [
+            -0.182,
+            0.426
+          ],
+          "paired_positive_share": 34.1
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 6432,
+            "mean": 0.541,
+            "median": -3.17,
+            "win_rate": 26.7,
+            "avg_win": 14.07,
+            "avg_loss": -4.4,
+            "payoff": 3.2,
+            "profit_factor": 1.17,
+            "stopped_rate": 72.2,
+            "median_days": 7.0,
+            "median_risk_pct": 2.51,
+            "mean_r": 0.176
+          },
+          "control_mean": 0.704,
+          "paired_diff": -0.163,
+          "paired_ci": [
+            -0.514,
+            0.195
+          ],
+          "paired_positive_share": 33.6
+        }
+      },
+      "60": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 8994,
+            "mean": -0.068,
+            "median": -3.787,
+            "win_rate": 14.1,
+            "avg_win": 29.27,
+            "avg_loss": -4.87,
+            "payoff": 6.02,
+            "profit_factor": 0.98,
+            "stopped_rate": 86.5,
+            "median_days": 7.0,
+            "median_risk_pct": 2.64,
+            "mean_r": -0.133
+          },
+          "control_mean": -0.094,
+          "paired_diff": 0.026,
+          "paired_ci": [
+            -0.377,
+            0.406
+          ],
+          "paired_positive_share": 32.1
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 6424,
+            "mean": 0.081,
+            "median": -3.708,
+            "win_rate": 15.3,
+            "avg_win": 25.79,
+            "avg_loss": -4.57,
+            "payoff": 5.64,
+            "profit_factor": 1.02,
+            "stopped_rate": 85.0,
+            "median_days": 7.0,
+            "median_risk_pct": 2.51,
+            "mean_r": -0.011
+          },
+          "control_mean": 0.464,
+          "paired_diff": -0.383,
+          "paired_ci": [
+            -0.724,
+            -0.019
+          ],
+          "paired_positive_share": 32.0
+        }
+      },
+      "120": {
+        "开发段 2019-01～2023-09": {
+          "signal": {
+            "n": 8993,
+            "mean": -0.032,
+            "median": -3.937,
+            "win_rate": 10.0,
+            "avg_win": 43.71,
+            "avg_loss": -4.9,
+            "payoff": 8.93,
+            "profit_factor": 0.99,
+            "stopped_rate": 90.9,
+            "median_days": 7.0,
+            "median_risk_pct": 2.64,
+            "mean_r": -0.124
+          },
+          "control_mean": -0.198,
+          "paired_diff": 0.166,
+          "paired_ci": [
+            -0.36,
+            0.758
+          ],
+          "paired_positive_share": 33.1
+        },
+        "留出段 2024-01～2026-11": {
+          "signal": {
+            "n": 6409,
+            "mean": 0.949,
+            "median": -3.859,
+            "win_rate": 12.2,
+            "avg_win": 40.98,
+            "avg_loss": -4.61,
+            "payoff": 8.88,
+            "profit_factor": 1.23,
+            "stopped_rate": 88.8,
+            "median_days": 7.0,
+            "median_risk_pct": 2.51,
+            "mean_r": 0.369
+          },
+          "control_mean": 1.228,
+          "paired_diff": -0.279,
+          "paired_ci": [
+            -0.831,
+            0.237
+          ],
+          "paired_positive_share": 34.1
+        }
+      }
+    }
+  }
+}

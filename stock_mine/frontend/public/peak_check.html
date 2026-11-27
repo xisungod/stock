@@ -1,0 +1,349 @@
+<title>波峰精准线检验台</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F7F8FA; --panel:#FFFFFF; --panel-2:#F0F2F5; --line:#DDE1E8;
+  --ink:#1A1D23; --ink-2:#5A6373; --ink-3:#8A93A3;
+  --up:#D6323A; --down:#1F9D63;
+  --peak:#E08700; --valley:#0089A8; --keyline:#7C5CE0; --keyline-2:#A9A2C4;
+  --accent:#7C5CE0;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1319; --panel:#161B23; --panel-2:#1D242E; --line:#2A323E;
+    --ink:#E8EBF0; --ink-2:#9AA4B4; --ink-3:#6B7585;
+    --up:#E5484D; --down:#30A46C;
+    --peak:#F5A524; --valley:#00B5D8; --keyline:#A78BFA; --keyline-2:#5B5480;
+    --accent:#A78BFA;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1319; --panel:#161B23; --panel-2:#1D242E; --line:#2A323E;
+  --ink:#E8EBF0; --ink-2:#9AA4B4; --ink-3:#6B7585;
+  --up:#E5484D; --down:#30A46C;
+  --peak:#F5A524; --valley:#00B5D8; --keyline:#A78BFA; --keyline-2:#5B5480;
+  --accent:#A78BFA;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:14px;line-height:1.5}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+header{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--panel);
+  display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
+h1{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.sub{color:var(--ink-3);font-size:12.5px}
+.cfg{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.cfg b{color:var(--ink);font-weight:500}
+.wrap{display:grid;grid-template-columns:186px 1fr 260px;gap:1px;background:var(--line);
+  min-height:calc(100vh - 62px)}
+.col{background:var(--panel);padding:14px;overflow:auto}
+.lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 9px;font-weight:600}
+.stk{width:100%;text-align:left;background:transparent;border:1px solid transparent;
+  border-radius:7px;padding:8px 10px;margin-bottom:3px;cursor:pointer;color:var(--ink);
+  font-family:inherit;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.stk:hover{background:var(--panel-2)}
+.stk[aria-selected="true"]{background:var(--panel-2);border-color:var(--accent)}
+.stk .c{color:var(--ink-3);font-size:11px}
+.stk:focus-visible,.tg:focus-visible,.rng:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.tg{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;
+  cursor:pointer;font-family:inherit;font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.tg[aria-pressed="true"]{color:var(--ink);border-color:currentColor}
+.tg .dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+.tg.pk[aria-pressed="true"]{color:var(--peak)}
+.tg.vl[aria-pressed="true"]{color:var(--valley)}
+.tg.kl[aria-pressed="true"]{color:var(--keyline)}
+.tg.vol[aria-pressed="true"]{color:var(--ink)}
+.rngs{margin-left:auto;display:flex;gap:4px}
+.rng{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:5px 10px;
+  cursor:pointer;font-family:inherit;font-size:12px;color:var(--ink-2)}
+.rng[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+canvas{width:100%;display:block;border-radius:8px;background:var(--panel)}
+.hint{margin-top:9px;font-size:11.5px;color:var(--ink-3)}
+.tip{position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--line);
+  border-radius:7px;padding:8px 10px;font-size:12px;opacity:0;transition:opacity .12s;z-index:9;
+  box-shadow:0 6px 22px rgba(0,0,0,.16)}
+.tip.on{opacity:1}
+.tip .r{display:flex;justify-content:space-between;gap:14px}
+.tip .k{color:var(--ink-3)}
+.sig{border:1px solid var(--line);border-radius:9px;padding:11px;margin-bottom:13px;background:var(--panel-2)}
+.sig .cat{font-size:12px;font-weight:600;margin-bottom:5px}
+.cat.buy_alert{color:var(--up)} .cat.watch{color:var(--peak)} .cat.none{color:var(--ink-3)}
+.sig .txt{font-size:12px;color:var(--ink-2);line-height:1.45}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--ink-3);font-weight:600;font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;padding:0 5px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px 5px;border-bottom:1px solid var(--line)}
+tr.main td{background:color-mix(in srgb,var(--keyline) 11%,transparent)}
+tr:hover td{background:var(--panel-2)}
+.pill{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;
+  background:var(--panel-2);color:var(--ink-2);border:1px solid var(--line)}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:13px}
+.stat div{background:var(--panel-2);border-radius:7px;padding:7px 9px}
+.stat .n{font-size:16px;font-weight:600}
+.stat .t{font-size:10.5px;color:var(--ink-3)}
+.warn{border-left:3px solid var(--peak);padding:8px 10px;background:var(--panel-2);
+  border-radius:0 6px 6px 0;font-size:11.5px;color:var(--ink-2);margin-top:11px}
+@media (max-width:1080px){.wrap{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<header>
+  <h1>波峰精准线检验台</h1>
+  <span class="sub">对照 K 线核验算法标注是否准确</span>
+  <div class="cfg">
+    <span>波峰窗口 <b class="mono">±5</b></span>
+    <span>显著度门槛 <b class="mono" id="cfg-thr">—</b></span>
+    <span>聚类误差带 <b class="mono">2.0%</b></span>
+    <span>最大偏离 <b class="mono">35%</b></span>
+  </div>
+</header>
+<div class="wrap">
+  <div class="col">
+    <p class="lbl">股票</p>
+    <div id="stocks"></div>
+    <div class="warn" id="note"></div>
+  </div>
+  <div class="col">
+    <div class="bar">
+      <button class="tg pk" id="t-peak" aria-pressed="true"><span class="dot"></span>波峰</button>
+      <button class="tg vl" id="t-valley" aria-pressed="true"><span class="dot"></span>波谷</button>
+      <button class="tg kl" id="t-line" aria-pressed="true"><span class="dot"></span>精准线</button>
+      <button class="tg vol" id="t-vol" aria-pressed="true"><span class="dot"></span>成交量</button>
+      <div class="rngs">
+        <button class="rng" data-n="320" aria-pressed="true">全部</button>
+        <button class="rng" data-n="240">1年</button>
+        <button class="rng" data-n="120">半年</button>
+        <button class="rng" data-n="60">3月</button>
+      </div>
+    </div>
+    <canvas id="cv"></canvas>
+    <p class="hint">▲ 波峰 &nbsp;·&nbsp; ▼ 波谷 &nbsp;·&nbsp; 实线＝主精准线，虚线＝次级线 &nbsp;·&nbsp; 线上的圆点＝该线的阻力触及点 &nbsp;·&nbsp; 悬停查看单日数据</p>
+  </div>
+  <div class="col">
+    <p class="lbl">识别结果</p>
+    <div class="stat" id="stat"></div>
+    <div id="sig"></div>
+    <p class="lbl">精准线明细</p>
+    <div style="overflow-x:auto"><table id="tbl"></table></div>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+let DATA = [];
+let cur = 0, span = 320, hoverK = -1;
+const show = {peak:true, valley:true, line:true, vol:true};
+
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d'), tip = $('#tip');
+
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+
+[['#t-peak','peak'],['#t-valley','valley'],['#t-line','line'],['#t-vol','vol']].forEach(([sel,k])=>{
+  $(sel).onclick=e=>{show[k]=!show[k];e.currentTarget.setAttribute('aria-pressed',show[k]);render();};
+});
+document.querySelectorAll('.rng').forEach(b=>{
+  b.onclick=()=>{span=+b.dataset.n;
+    document.querySelectorAll('.rng').forEach(x=>x.setAttribute('aria-pressed',x===b));render();};
+});
+
+let geo = null;
+
+function render(){
+  const d = DATA[cur];
+  const n = d.close.length, from = Math.max(0, n - span);
+  const idx = [];
+  for(let i=from;i<n;i++) idx.push(i);
+
+  // 必须用 canvas 自身的显示宽度：父容器 clientWidth 含 padding，
+  // 而 canvas 是 width:100%（content-box），两者不等会让绘图坐标被浏览器缩放，
+  // 导致鼠标位置与 tooltip 显示的 K 线错位（越往右偏得越多）。
+  const W = Math.round(cv.getBoundingClientRect().width) || cv.parentElement.clientWidth,
+        VOL = show.vol?86:0, H = 430 + VOL;
+  const dpr = window.devicePixelRatio||1;
+  cv.width = W*dpr; cv.height = H*dpr; cv.style.height = H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  const PL=54, PR=16, PT=14, PB=26, CH=430-PT-PB;
+  const plotW = W-PL-PR;
+
+  let lo=Infinity, hi=-Infinity;
+  idx.forEach(i=>{ lo=Math.min(lo,d.low[i]); hi=Math.max(hi,d.high[i]); });
+  d.lines.forEach(L=>{ if(L.price>lo*0.86 && L.price<hi*1.14){ lo=Math.min(lo,L.price); hi=Math.max(hi,L.price);} });
+  const pad=(hi-lo)*0.07; lo-=pad; hi+=pad;
+
+  const cw = plotW/idx.length;
+  const X = k => PL + k*cw + cw/2;
+  const Y = p => PT + (hi-p)/(hi-lo)*CH;
+  geo = {idx,X,Y,cw,PL,PT,CH,lo,hi,plotW,W};
+
+  // grid
+  ctx.strokeStyle=css('--line'); ctx.fillStyle=css('--ink-3');
+  ctx.font='11px "IBM Plex Mono",monospace'; ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){
+    const p=lo+(hi-lo)*g/4, y=Math.round(Y(p))+.5;
+    ctx.globalAlpha=.5; ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke(); ctx.globalAlpha=1;
+    ctx.textAlign='right'; ctx.fillText(p.toFixed(2), PL-7, y+3.5);
+  }
+  // date labels
+  ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(idx.length/6));
+  for(let k=0;k<idx.length;k+=step){
+    ctx.fillText(d.dates[idx[k]].slice(2,7), X(k), PT+CH+16);
+  }
+
+  // key lines
+  if(show.line){
+    const main = d.signal && d.signal.key_line;
+    d.lines.forEach(L=>{
+      if(L.price<lo||L.price>hi) return;
+      const y=Y(L.price), isMain = main && Math.abs(L.price-main)<1e-6;
+      ctx.strokeStyle = isMain?css('--keyline'):css('--keyline-2');
+      ctx.lineWidth = isMain?1.8:1;
+      ctx.setLineDash(isMain?[]:[5,4]);
+      ctx.globalAlpha = isMain?1:.75;
+      ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha=1;
+      // 触及点
+      ctx.fillStyle = isMain?css('--keyline'):css('--keyline-2');
+      L.touch.forEach(t=>{ const k=t-from; if(k>=0&&k<idx.length){
+        ctx.beginPath(); ctx.arc(X(k),y,3.2,0,7); ctx.fill(); }});
+      // 标签
+      ctx.fillStyle = isMain?css('--keyline'):css('--ink-3');
+      ctx.font=(isMain?'600 ':'')+'10.5px "IBM Plex Mono",monospace';
+      ctx.textAlign='left';
+      ctx.fillText(L.price.toFixed(2)+(isMain?' 主线':''), PL+4, y-4);
+    });
+  }
+
+  // candles
+  const bw=Math.max(1.2,Math.min(cw*0.66,9));
+  idx.forEach((i,k)=>{
+    const up=d.close[i]>=d.open[i], c=up?css('--up'):css('--down');
+    ctx.strokeStyle=c; ctx.fillStyle=c; ctx.lineWidth=1;
+    const x=X(k);
+    ctx.beginPath(); ctx.moveTo(x,Y(d.high[i])); ctx.lineTo(x,Y(d.low[i])); ctx.stroke();
+    const y1=Y(Math.max(d.open[i],d.close[i])), y2=Y(Math.min(d.open[i],d.close[i]));
+    ctx.fillRect(x-bw/2, y1, bw, Math.max(1,y2-y1));
+  });
+
+  // 悬停高亮：竖线标出当前 tooltip 对应的那根K线
+  if(hoverK>=0 && hoverK<idx.length){
+    ctx.strokeStyle=css('--accent'); ctx.globalAlpha=.45; ctx.lineWidth=1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(X(hoverK),PT); ctx.lineTo(X(hoverK),PT+CH); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+  }
+
+  // peaks / valleys
+  const mark=(list,color,dir)=>{
+    ctx.fillStyle=color;
+    list.forEach(p=>{ const k=p-from; if(k<0||k>=idx.length) return;
+      const i=idx[k], x=X(k), y=dir>0?Y(d.high[i])-9:Y(d.low[i])+9;
+      ctx.beginPath();
+      if(dir>0){ctx.moveTo(x,y-4);ctx.lineTo(x-4.5,y+3);ctx.lineTo(x+4.5,y+3);}
+      else{ctx.moveTo(x,y+4);ctx.lineTo(x-4.5,y-3);ctx.lineTo(x+4.5,y-3);}
+      ctx.closePath(); ctx.fill();
+    });
+  };
+  if(show.peak) mark(d.peaks, css('--peak'), 1);
+  if(show.valley) mark(d.valleys, css('--valley'), -1);
+
+  // volume
+  if(show.vol){
+    const vTop=430+6, vH=VOL-16;
+    let vm=0; idx.forEach(i=>vm=Math.max(vm,d.volume[i]));
+    idx.forEach((i,k)=>{
+      const up=d.close[i]>=d.open[i];
+      ctx.fillStyle=up?css('--up'):css('--down'); ctx.globalAlpha=.5;
+      const h=vm?d.volume[i]/vm*vH:0;
+      ctx.fillRect(X(k)-bw/2, vTop+vH-h, bw, h);
+    });
+    ctx.globalAlpha=1;
+  }
+
+  const th=d.cfg&&d.cfg.prominence!=null?d.cfg.prominence.toFixed(2)+'%':'—';
+  const at=d.cfg&&d.cfg.atr?` (ATR ${d.cfg.atr.toFixed(1)}%)`:'';
+  const el=document.getElementById('cfg-thr'); if(el) el.textContent=th+at;
+  panel(d, idx.length);
+}
+
+function panel(d, shown){
+  $('#stat').innerHTML =
+    `<div><div class="n mono" style="color:var(--peak)">${d.peaks.length}</div><div class="t">波峰（窗口内）</div></div>
+     <div><div class="n mono" style="color:var(--valley)">${d.valleys.length}</div><div class="t">波谷（窗口内）</div></div>
+     <div><div class="n mono" style="color:var(--keyline)">${d.lines.length}</div><div class="t">精准线</div></div>
+     <div><div class="n mono">${shown}</div><div class="t">显示K线</div></div>`;
+
+  const s=d.signal;
+  $('#sig').innerHTML = !s ? '<div class="sig"><div class="txt">该股票未产生结构结果</div></div>' :
+    `<div class="sig">
+       <div class="cat ${s.category}">${({buy_alert:'买入预警',watch:'观察机会',none:'暂不行动'})[s.category]||s.category}</div>
+       <div class="txt">${s.suggestion||''}</div>
+       ${s.breakout_date?`<div class="txt" style="margin-top:5px">突破 <span class="mono">${s.breakout_date}</span>${s.pullback_date?` · 回踩 <span class="mono">${s.pullback_date}</span>`:''}</div>`:''}
+     </div>`;
+
+  const main=s&&s.key_line;
+  $('#tbl').innerHTML =
+    '<thead><tr><th>价位</th><th>类型</th><th>阻力</th><th>支撑</th></tr></thead><tbody>' +
+    d.lines.map(L=>{
+      const isMain = main && Math.abs(L.price-main)<1e-6;
+      const t = L.type==='resistance'?'阻力':L.type==='support'?'支撑':'阻力转支撑';
+      return `<tr class="${isMain?'main':''}"><td class="mono">${L.price.toFixed(2)}${isMain?' ●':''}</td>`+
+             `<td><span class="pill">${t}</span></td><td class="mono">${L.resistance}</td><td class="mono">${L.support}</td></tr>`;
+    }).join('') + '</tbody>';
+
+  $('#note').innerHTML = d.peaks.length===0
+    ? '此窗口内未识别到波峰。若图上明显有局部高点，说明显著度门槛（1%）偏严。'
+    : `全历史共 ${d.peaks_all_count} 个波峰、${d.valleys_all_count} 个波谷；当前窗口显示其中一部分。`;
+}
+
+cv.addEventListener('mousemove', e=>{
+  if(!geo) return;
+  const r=cv.getBoundingClientRect();
+  // 若显示宽度与绘图宽度仍有出入，按比例换算回绘图坐标系
+  const sx = r.width ? (geo.W / r.width) : 1;
+  const x = (e.clientX - r.left) * sx;
+  const k=Math.floor((x-geo.PL)/geo.cw);
+  if(k<0||k>=geo.idx.length){ tip.classList.remove('on'); return; }
+  const d=DATA[cur], i=geo.idx[k];
+  const isPk=d.peaks.includes(i), isVl=d.valleys.includes(i);
+  tip.innerHTML =
+    `<div class="r"><span class="k">${d.dates[i]}</span>${isPk?'<span style="color:var(--peak)">▲波峰</span>':''}${isVl?'<span style="color:var(--valley)">▼波谷</span>':''}</div>`+
+    `<div class="r"><span class="k">高</span><span class="mono">${d.high[i].toFixed(2)}</span></div>`+
+    `<div class="r"><span class="k">低</span><span class="mono">${d.low[i].toFixed(2)}</span></div>`+
+    `<div class="r"><span class="k">收</span><span class="mono">${d.close[i].toFixed(2)}</span></div>`;
+  hoverK = k;
+  render();
+  tip.style.left=Math.min(e.clientX+14, innerWidth-160)+'px';
+  tip.style.top=(e.clientY+14)+'px';
+  tip.classList.add('on');
+});
+cv.addEventListener('mouseleave',()=>{tip.classList.remove('on');hoverK=-1;render();});
+addEventListener('resize',render);
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',render);
+
+// 数据独立加载：内嵌会导致改完算法忘记重新生成 HTML，页面显示陈旧结果
+fetch('viz_data.json?t=' + Date.now())
+  .then(r => r.json())
+  .then(d => {
+    DATA = d;
+    const box = document.getElementById('stocks');
+    box.innerHTML = '';
+    DATA.forEach((s,i)=>{
+      const b=document.createElement('button');
+      b.className='stk'; b.setAttribute('aria-selected', i===0);
+      b.innerHTML=`<span>${s.name}</span><span class="c mono">${s.code}</span>`;
+      b.onclick=()=>{cur=i;document.querySelectorAll('.stk').forEach((x,j)=>x.setAttribute('aria-selected',j===i));render();};
+      box.appendChild(b);
+    });
+    render();
+  })
+  .catch(e => {
+    document.getElementById('note').textContent = '数据加载失败：' + e.message;
+  });
+</script>
