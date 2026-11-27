@@ -130,6 +130,19 @@ def test_triangle_keeps_its_edges_after_another_confirmed_touch():
     assert triangle["direction"] == "up" and triangle["end"] == 48
 
 
+def test_descending_flat_keeps_a_level_base_and_rejects_a_rising_one():
+    """下沿抬高约 9% 时默认仍认定；下降三角要求下沿涨幅不超过 3%，且上沿下降。"""
+    close = np.full(55, 11.5)
+    close[48] = 12.6
+    rising_base = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.6), ("V", 40, 10.9))
+    assert find_triangles(rising_base, close) != []
+    assert find_triangles(rising_base, close, descending_flat_pct=0.03) == []
+    level_base = triangle_pivots(("P", 0, 13.0), ("V", 10, 10.0), ("P", 20, 12.4), ("V", 40, 10.2))
+    level_close = np.full(55, 11.0)
+    level_close[48] = 13.0
+    assert find_triangles(level_base, level_close, descending_flat_pct=0.03) != []
+
+
 def test_ascending_flat_keeps_a_nearly_level_top_and_rejects_a_falling_one():
     """上沿跌约 3.1% 时默认仍认定；3% 走平上限不认。上沿跌约 2.3% 且下沿抬高才留下。"""
     close = np.full(55, 11.5)
