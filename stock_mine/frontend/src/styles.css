@@ -868,6 +868,21 @@ tr.selected {
   gap: 6px;
 }
 .chart-key-line-legend i { width: 13px; height: 2px; flex: 0 0 auto; }
+.chart-pattern-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 8px 12px;
+  border-top: 1px solid #edf0f4;
+  color: #536175;
+  font-size: 11px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+.chart-pattern-legend span { display: inline-flex; align-items: center; gap: 4px; overflow-wrap: anywhere; }
+.chart-pattern-legend i { width: 13px; height: 2px; flex: 0 0 auto; }
+.chart-pattern-legend small { flex-basis: 100%; color: #8a94a3; font-size: 11px; }
 .analysis-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #e1e7ed; margin-bottom: 12px; }
 .analysis-controls label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
 .analysis-controls select, .analysis-controls input { max-width: 200px; min-width: 0; padding: 7px; border: 1px solid #d4dde7; border-radius: 4px; background: #fff; }

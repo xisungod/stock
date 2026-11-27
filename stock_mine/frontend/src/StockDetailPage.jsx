@@ -155,6 +155,7 @@ export default function StockDetailPage({ stockCode, stockName = '', scanId = ''
   }, [detail?.chart, detail?.analysis?.result?.pattern_type, selectedFlag, selectedPatternType, selectedHistoricalSignal, historicalBasisMatches]);
   const [showSwings, setShowSwings] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showTriangles, setShowTriangles] = useState(true);
   const [backtestWindow, setBacktestWindow] = useState(250);
   const [backtestSeconds, setBacktestSeconds] = useState(0);
   const [sections, setSections] = useState(() => sectionStates('idle'));
@@ -703,6 +704,10 @@ export default function StockDetailPage({ stockCode, stockName = '', scanId = ''
               <input type="checkbox" checked={showAlerts} onChange={toggleHistoricalAlerts} />
               历史预警
             </label>
+            <label title="上下沿分别从实际触点起画。收盘价越过边界 0.5% 后标记突破。">
+              <input type="checkbox" checked={showTriangles} onChange={(event) => setShowTriangles(event.target.checked)} />
+              三角形
+            </label>
             <span className="backtest-picker">
               {sections.backtest.status === 'loading'
                 ? <span className="chart-backtest-state"><Loader2 className="spin" size={14} /> 复盘中 {backtestSeconds} 秒</span>
@@ -744,6 +749,7 @@ export default function StockDetailPage({ stockCode, stockName = '', scanId = ''
             selectedLineKeys={selectedLineKeys}
             showSwings={showSwings}
             showAlerts={showAlerts}
+            showTriangles={showTriangles}
             precisionEvidence={precisionEvidence}
             onRangeChange={setLinkedRange}
             onCursorChange={setLinkedCursor}

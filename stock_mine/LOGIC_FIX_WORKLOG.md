@@ -123,3 +123,41 @@ within a median 7 days averaging −4.2～4.5% (median initial risk 2.4%; close-
 stop), profit factor 1.02 / 1.18 — and random entries with the same stop distance do about as well (−0.20% / +0.22%).
 The paired difference of the fixed rules is positive in both periods at all of N=20/60/120 (+0.28～0.50%), never
 significant; the pre-fix rules are at or below random (holdout N=60 −0.38%, CI −0.72～−0.02).
+
+## Triangle and double-bottom (W) patterns (`scripts/pattern_backtest.py`, `reports/logic_fixes_20261127/patterns/`)
+
+Protocol fixed before running (full definitions in the script docstring). Pivots come from the production
+`confirmed_swings` (threshold clip(1.5 × ATR20%, 3%, 8%), the legacy engine's defaults) and are used only after their
+confirmation day; a truncation check (310 random detections re-detected on bars cut at the signal day) matched 310/310.
+W bottom: bottoms within 4%, 10–120 sessions apart, neckline ≥ 8% above, prior peak above the neckline and ≥ 15% above
+the first bottom; stop = lower bottom × (1 − 1.5%). Entry A at the second bottom's confirmation, entry B at the first
+close above the neckline within 40 sessions. Triangle: last four pivots, upper line non-rising, lower line non-falling,
+width shrinking to ≤ 60%, span 15–100 sessions; entry at the first close above the upper line within 40 sessions;
+stop = later valley × (1 − 1.5%). Same exits and matched-stop random controls as the line-stop test; three primary
+hypotheses, so the pass rule uses a Bonferroni 98.3% monthly-block interval. 595 stocks, as of 2026-11-26.
+
+Result (N=60, paired difference vs same-day matched-stop random entries): **all three fail**.
+
+| Entry | Development 2019-01～2023-09 | Holdout 2024-01～ |
+|---|---|---|
+| W bottom A, second-bottom confirmation | +0.38% (−0.88～1.62), 2352 trades | +0.22% (−1.13～1.47), 1503 |
+| W bottom B, neckline breakout | −0.59% (−2.21～1.04), 1297 | −1.61% (−3.60～0.24), 771 |
+| Triangle upward breakout | −0.61% (−1.64～0.42), 2878 | −0.95% (−2.20～0.28), 1917 |
+
+Descriptive: 20 sessions after a triangle is detected, the absolute move (10.06% / 10.44%) equals that of random
+stocks in the same ATR% quintile on the same day (9.98% / 10.23%), and breakouts split about evenly (3448 up / 3088
+down; 2226 / 2345) — triangles predict neither direction nor extra volatility. Positive absolute returns are shared
+by the controls (sample drift, survivorship), so only the paired differences are informative.
+
+Across the four entry types tested today, buying near support (line pullback, W second bottom) is slightly above
+random and buying breakouts (W neckline, triangle) slightly below, in both periods; none is significant. This is a
+post-hoc cross-test observation, consistent with the short-term reversal often reported for A-shares — a hypothesis.
+
+## Chart annotations for W bottoms and triangles
+
+The detectors moved to `backend/app/services/chart_patterns.py`; `scripts/pattern_backtest.py` now calls them, and a
+rerun reproduced `reports/logic_fixes_20261127/patterns/` byte for byte (summary, trades, report, examples); the
+truncation check still matches 310/310. `build_full_chart` adds `chart_patterns` (settled bars only; non-overlapping
+patterns, most recent first). The detail page draws them next to the precision lines with `W底` / `三角形` toggles
+(default on), a legend with counts and the latest status, and the note that they are annotations only.
+Verification: 558 backend and 150 frontend tests passed; production build passed; checked in the browser on 000012.

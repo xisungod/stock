@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { buildFlagSeries } from './flagLines.js';
+import { PATTERN_COLORS, buildPatternSeries, latestPatternSummary } from './patternLines.js';
 import { dateIndexRange, pointerDate, presetDateRange, rightAnchoredWheelRange, wheelDeltaPixels, zoomDateRange } from './chartSync.js';
 import {
   DEFAULT_VISIBLE_LINES,
@@ -47,6 +48,7 @@ export default function KLineChart({
   selectedLineKeys = [],
   showSwings = false,
   showAlerts = true,
+  showTriangles = false,
   precisionEvidence = null,
   maxLines = DEFAULT_VISIBLE_LINES,
   onRangeChange,
@@ -90,6 +92,7 @@ export default function KLineChart({
     evidence: precisionEvidence
   }), [pointLines, bars, precisionEvidence]);
   const precisionPoints = useMemo(() => precisionSeries.flatMap(series => series.data), [precisionSeries]);
+  const patternSummary = useMemo(() => latestPatternSummary(chart?.chart_patterns), [chart?.chart_patterns]);
   const visiblePointCount = precisionPoints.filter(point => (
     point.value[0] >= visibleRange.startDate && point.value[0] <= visibleRange.endDate
   )).length;
@@ -189,6 +192,7 @@ export default function KLineChart({
       ...swingSeries,
       ...precisionSeries,
       ...buildFlagSeries(chart?.flag_pattern, bars),
+      ...buildPatternSeries(chart?.chart_patterns, bars, { showTriangles }),
       { name: '成交量', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: volume, barMaxWidth: 7 }
     ];
     if (full) {
@@ -211,7 +215,7 @@ export default function KLineChart({
             itemWidth: 13,
             itemHeight: 7,
             textStyle: { color: '#667386', fontSize: 11 },
-            data: series.filter(item => !item.id?.startsWith('precision-'))
+            data: series.filter(item => !item.id?.startsWith('precision-') && !item.id?.startsWith('pattern-'))
               .map((item) => item.name).filter((name) => !['波峰', '波谷', '候选点'].includes(name))
           }
         : { show: false },
@@ -307,7 +311,7 @@ export default function KLineChart({
     // 每渲染一次就重建一次图表，而 effect 里的 setVisibleRange 又触发渲染 —— 死循环。
     // 依赖用它的字符串签名 selectedSignature。
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bars, chart, chartId, dates, drawnLines, full, keyLines, maxLines, selectedSignature, showAlerts, showSwings, pointLines, precisionSeries]);
+  }, [bars, chart, chartId, dates, drawnLines, full, keyLines, maxLines, selectedSignature, showAlerts, showSwings, showTriangles, pointLines, precisionSeries]);
 
   useEffect(() => {
     const instance = instanceRef.current;
@@ -363,6 +367,7 @@ export default function KLineChart({
       data-precision-point-count={precisionPoints.length}
       data-visible-precision-point-count={visiblePointCount}
       data-flag-direction={chart?.flag_pattern?.direction || undefined}
+      data-triangle-count={showTriangles ? patternSummary.triangleCount : 0}
     >
       {full && (
         <div className="chart-ranges" aria-label="K线时间范围">
@@ -383,6 +388,15 @@ export default function KLineChart({
             {precisionAnchorLabel(precisionEvidence?.anchor)}
           </span>}
           <span className="precision-point-count">当前区间 {visiblePointCount} 点 · 已绘制 {precisionPoints.length} 点</span>
+        </div>
+      )}
+      {full && showTriangles && patternSummary.triangleCount > 0 && (
+        <div className="chart-pattern-legend" aria-label="形态图例">
+          <span>
+            <i style={{ backgroundColor: PATTERN_COLORS.triangleUp }} />
+            <i style={{ backgroundColor: PATTERN_COLORS.triangleDown }} />
+            三角形 {patternSummary.triangleCount} 个{patternSummary.latestTriangle ? `（最近 ${patternSummary.latestTriangle.date}：${patternSummary.latestTriangle.label}）` : ''}
+          </span>
         </div>
       )}
       {full && drawnLines.length > 0 && (

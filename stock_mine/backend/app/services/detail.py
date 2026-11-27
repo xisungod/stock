@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
 
+from app.services.chart_patterns import detect_chart_patterns
+from app.services.market_calendar import SETTLED_AFTER, china_time
 from app.services.strategy import (
     SignalResult,
     StrategyConfig,
+    _completed_session_bars,
     _normalize_bars,
     _swings,
 )
@@ -30,6 +34,22 @@ def _swing_points(df: pd.DataFrame, chart_bars: list[dict[str, Any]]) -> tuple[l
         candidate = {"date": bar["date"], "kind": pending["kind"],
                      "price": bar["high"] if pending["kind"] == "peak" else bar["low"]}
     return peaks, valleys, candidate
+
+
+def _settled_pattern_bars(df: pd.DataFrame, quality: dict[str, Any]) -> pd.DataFrame:
+    settled = _completed_session_bars(df, quality, StrategyConfig(signal_offset=0))
+    checked_at = quality.get("checked_at")
+    if not checked_at:
+        return settled
+    try:
+        checked = china_time(datetime.fromisoformat(checked_at))
+    except (ValueError, TypeError):
+        return settled
+    # 收盘后请求失败时，盘中保存的最后一根 K 线仍未完成，直至再次成功获取。
+    cutoff = checked.date()
+    if checked.time() < SETTLED_AFTER:
+        cutoff -= timedelta(days=1)
+    return settled[settled["trade_date"] <= pd.Timestamp(cutoff)]
 
 
 def build_full_chart(
@@ -70,6 +90,11 @@ def build_full_chart(
         if result.pullback_date:
             markers.append({"date": result.pullback_date, "type": "pullback", "label": "回踩"})
     peaks, valleys, pending_swing = _swing_points(df, chart_bars)
+    # 形态只用已收盘 K 线识别：盘中未定型的最后一根会让「突破」在收盘前反复出现又消失。
+    settled = _settled_pattern_bars(df, bars.attrs.get("data_quality") or {})
+    chart_patterns = detect_chart_patterns(
+        settled.reset_index(drop=True), [item["date"] for item in chart_bars[:len(settled)]]
+    )
     return {
         "bars": chart_bars,
         "peaks": peaks,
@@ -79,6 +104,7 @@ def build_full_chart(
         "key_lines": result.key_lines if result is not None else [],
         "markers": markers,
         "flag_pattern": result.flag_pattern if result is not None else None,
+        "chart_patterns": chart_patterns,
         "range": {
             "start": chart_bars[0]["date"] if chart_bars else None,
             "end": chart_bars[-1]["date"] if chart_bars else None,
